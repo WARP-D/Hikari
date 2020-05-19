@@ -8,11 +8,11 @@ using Unity.Mathematics;
 namespace Cyanite.AI {
     public unsafe struct SimpleBoard {
         public fixed ushort cells[Length];
-        public readonly uint ren;
         public readonly byte backToBack;
-        public readonly Bag bag;
-        public readonly PieceKind reserve;
         public readonly bool holdingSomething;
+        public readonly PieceKind reserve;
+        public readonly Bag bag;
+        public readonly uint ren;
 
         private const ushort FilledLine = 0b11111_11111;
         private const int Length = 20;

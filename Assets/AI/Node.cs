@@ -1,31 +1,24 @@
-using Cyanite.Puzzle;
 using Unity.Collections;
-using Unity.Mathematics;
 
 namespace Cyanite.AI {
     public struct Node {
         public bool valid;
-        public SimpleBoard board;
         
         public int parent;
         public bool holdUsed;
         public ChildrenRef children;
         public Evaluation eval;
 
-        public Node(int parent, Allocator alloc) {
+        public Node(int parent) {
             valid = true;
-            var grid = new NativeArray<ushort>(20,alloc);
-            board = new SimpleBoard(grid);
-            grid.Dispose();
             this.parent = parent;
             children = default;
             eval = default;
             holdUsed = false;
         }
 
-        public Node(int parent, in SimpleBoard prevBoard, in Piece piece, Evaluation evaluation, NativeArray<int4x4> shapeRef) {
+        public Node(int parent, Evaluation evaluation) {
             valid = true;
-            this.board = prevBoard.AddPieceFast(piece, shapeRef);
             this.parent = parent;
             children = default;
             eval = evaluation;

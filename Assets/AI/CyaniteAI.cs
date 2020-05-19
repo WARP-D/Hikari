@@ -14,7 +14,7 @@ using Random = Unity.Mathematics.Random;
 namespace Cyanite.AI {
     public class CyaniteAI : IDisposable {
         private NativeList<Node> tree;
-        // private NativeArray<Node> treeCopy;
+        private NativeList<SimpleBoard> boards;
         private int root;
         private NativeQueue<PieceKind> nextPieces;
         private Queue<PieceKind> nextPiecesToAdd = new Queue<PieceKind>();
@@ -31,6 +31,7 @@ namespace Cyanite.AI {
         private NativeList<ExpandResult> expandedList;
         private NativeArray<PieceKind> nextPiecesArray;
         private NativeArray<Evaluation> evaluations;
+        private NativeMultiHashMap<int, NodeWithPiece> expandedMap;
 
         private NativeArray<int4x4> pieceShapes;
 
@@ -40,15 +41,20 @@ namespace Cyanite.AI {
         private bool requestNextMove;
         private Move? lastMove;
 
+        private int length;
+
         public bool useHold = false;
-        private NativeMultiHashMap<int, Node> expandedMap;
 
         public int ParallelCount { get; set; } = 7*50;
 
         public void Start() {
-            
+            Debug.Log(UnsafeUtility.SizeOf<SimpleBoard>());
+            Debug.Log(UnsafeUtility.SizeOf<Node>());
             tree = new NativeList<Node>(1_000_000, Allocator.Persistent) {
-                new Node(-1,Allocator.Persistent)
+                new Node(-1)
+            };
+            boards = new NativeList<SimpleBoard>(1_000_000, Allocator.Persistent) {
+                new SimpleBoard()
             };
             nextPieces = new NativeQueue<PieceKind>(Allocator.Persistent);
             
@@ -59,11 +65,13 @@ namespace Cyanite.AI {
             // Complete previous job
             if (scheduled) {
                 jobHandle.Complete();
-                //TODO accumulate job results
+                if (requestNextMove) {
+                    //todo
+                }
                 
                 // Debug.Log(selectJob.retryCounts.Sum());
                 // Debug.Log(tree.AsArray().Select(n => n.eval.Sum()).Min());
-                Debug.Log(tree.Length);
+                length = tree.Length;
                 DisposeJobs();
                 scheduled = false;
                 
@@ -79,9 +87,6 @@ namespace Cyanite.AI {
 
             // Prepare queue & tree
             nextPiecesArray = nextPieces.ToArray(Allocator.TempJob);
-            
-            // treeCopy = new NativeArray<Node>(tree.Length, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-            // treeCopy.CopyFrom(tree);
 
             var parallelCount = math.min(ParallelCount, tree.Length); //todo is this the right way?
             
@@ -97,6 +102,7 @@ namespace Cyanite.AI {
             selectedArray = new NativeArray<SelectResult>(parallelCount, Allocator.TempJob);
             selectJob = new SelectJob {
                 tree = tree.AsDeferredJobArray(),
+                boards = boards.AsDeferredJobArray(),
                 rootIndex = new NativeArray<int>(1, Allocator.TempJob) {
                     [0] = root
                 },
@@ -115,6 +121,7 @@ namespace Cyanite.AI {
                 },
                 pieceShapes = pieceShapes,
                 selected = selectJob.selected,
+                boards = boards.AsDeferredJobArray(),
                 expandResultWriter = expandedList.AsParallelWriter()
             };
             jobHandle = expandJob.Schedule(parallelCount, 1, jobHandle);
@@ -126,11 +133,12 @@ namespace Cyanite.AI {
                     [0] = Weights.Default
                 },
                 pieceShapes = pieceShapes,
-                results = evaluations
+                results = evaluations,
+                boards = boards.AsDeferredJobArray()
             };
             jobHandle = evaluateJob.Schedule(expandedList, 1, jobHandle);
 
-            expandedMap = new NativeMultiHashMap<int, Node>(parallelCount * 300,Allocator.TempJob);
+            expandedMap = new NativeMultiHashMap<int, NodeWithPiece>(parallelCount * 300,Allocator.TempJob);
             reorderChildrenJob = new ReorderChildrenJob {
                 expandResults = expandedList,
                 evaluations = evaluations,
@@ -141,7 +149,9 @@ namespace Cyanite.AI {
             
             treeWriteJob = new TreeWriteJob {
                 map = expandedMap,
-                tree = tree
+                tree = tree,
+                boards = boards,
+                pieceShapes = pieceShapes
             };
             jobHandle = treeWriteJob.Schedule(jobHandle);
 
@@ -149,7 +159,7 @@ namespace Cyanite.AI {
             scheduled = true;
             
             
-            
+            Debug.Log(length);
         }
 
         public void AddNextPiece(PieceKind pieceKind) {
@@ -164,24 +174,23 @@ namespace Cyanite.AI {
         }
 
         public void GarbageReceived(IEnumerable<ushort> garbageLines) {
-            
+            //todo
         }
 
         public void Reset(IEnumerable<ushort> lines, bool b2b, uint combo) {
-            
+            //todo
         }
 
         public void Dispose() {
             jobHandle.Complete();
             
-            if (tree.IsCreated) {
-                tree.Dispose();
-            }
+            DisposeJobs();
+            
+            if (tree.IsCreated) tree.Dispose();
+            if (boards.IsCreated) boards.Dispose();
 
             if (nextPieces.IsCreated) nextPieces.Dispose();
             if (pieceShapes.IsCreated) pieceShapes.Dispose();
-            
-            DisposeJobs();
         }
 
         private void DisposeJobs() {

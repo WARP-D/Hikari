@@ -6,6 +6,7 @@ using Unity.Mathematics;
 namespace Cyanite.AI.Jobs {
     [BurstCompile]
     public unsafe struct EvaluateJob : IJobParallelForDefer {
+        [ReadOnly] public NativeArray<SimpleBoard> boards;
         [ReadOnly] public NativeArray<ExpandResult> inputs;
         [ReadOnly,DeallocateOnJobCompletion] public NativeArray<Weights> weight;
         [ReadOnly] public NativeArray<int4x4> pieceShapes;
@@ -19,7 +20,7 @@ namespace Cyanite.AI.Jobs {
             var defense = 0;
             var offense = 0;
 
-            var board = ex.board.AddPieceFast(pl,pieceShapes);
+            var board = boards[ex.parentIndex].AddPieceFast(pl,pieceShapes);
             var columns = stackalloc int[10];
             var maxHeights = stackalloc byte[10];
             GetColumns(ref board, columns, maxHeights);

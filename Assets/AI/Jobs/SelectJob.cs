@@ -8,6 +8,7 @@ namespace Cyanite.AI.Jobs {
     [BurstCompile]
     public struct SelectJob : IJobParallelFor {
         [ReadOnly] public NativeArray<Node> tree;
+        [ReadOnly] public NativeArray<SimpleBoard> boards;
         [ReadOnly] public NativeArray<PieceKind> pieceQueue;
         [ReadOnly, DeallocateOnJobCompletion] public NativeArray<int> rootIndex;
         [ReadOnly] public NativeArray<Random> rands;
@@ -15,7 +16,7 @@ namespace Cyanite.AI.Jobs {
         [WriteOnly] public NativeArray<int> depths;
         [WriteOnly] public NativeArray<int> retryCounts;
 
-        private const int BaseScore = 400;
+        private const int BaseScore = 1000;
 
         public void Execute(int i) {
             var retryCount = 0;
@@ -39,7 +40,7 @@ namespace Cyanite.AI.Jobs {
                 Select(ref current, ref depth, ref rng);
             }
 
-            var selectResult = new SelectResult(current, current.node.board.holdingSomething ? pieceQueue[depth + 1] : pieceQueue[depth]);
+            var selectResult = new SelectResult(current, boards[current.index].holdingSomething ? pieceQueue[depth + 1] : pieceQueue[depth]);
             selected[i] = selectResult;
             depths[i] = depth;
             retryCounts[i] = retryCount;

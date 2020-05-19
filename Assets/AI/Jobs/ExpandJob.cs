@@ -10,8 +10,8 @@ namespace Cyanite.AI.Jobs {
         [ReadOnly, DeallocateOnJobCompletion] public NativeArray<bool> useHold;
         [ReadOnly] public NativeArray<int4x4> pieceShapes;
         [ReadOnly] public NativeArray<SelectResult> selected;
+        [ReadOnly] public NativeArray<SimpleBoard> boards;
         public NativeList<ExpandResult>.ParallelWriter expandResultWriter;
-        // public NativeList<Node>.ParallelWriter treeWriter;
 
         public void Execute(int index) {
             if (!selected[index].valid) return;
@@ -26,9 +26,9 @@ namespace Cyanite.AI.Jobs {
                     for (sbyte s = 0; s < spins; s++) {
                         var piece = new Piece(selected[index].currentPiece, x, y, s);
                         
-                        if (!selected[index].node.board.CollidesFast(piece,pieceShapes)
-                            && selected[index].node.board.GroundedFast(piece,pieceShapes)) {
-                            temp.Add(new ExpandResult(selected[index].node.board,selected[index].index,piece, false));
+                        if (!boards[selected[index].index].CollidesFast(piece,pieceShapes)
+                                    && boards[selected[index].index].GroundedFast(piece,pieceShapes)) {
+                            temp.Add(new ExpandResult(selected[index].index,piece, false));
                         }
                     }
                 }
