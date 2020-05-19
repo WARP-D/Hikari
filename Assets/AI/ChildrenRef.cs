@@ -1,9 +1,9 @@
 using System;
 
 namespace Hikari.AI {
-    public struct ChildrenRef : IEquatable<ChildrenRef> {
-        public int start;
-        public int length;
+    public readonly struct ChildrenRef : IEquatable<ChildrenRef> {
+        public readonly int start;
+        public readonly int length;
 
         public ChildrenRef(int start, int length) {
             this.start = start;
