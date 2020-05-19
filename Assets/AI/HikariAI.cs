@@ -48,7 +48,7 @@ namespace Hikari.AI {
         public int ParallelCount { get; set; } = 7*50;
 
         public void Start() {
-            Debug.Log(UnsafeUtility.SizeOf<SimpleBoard>());
+            Debug.Log(UnsafeUtility.SizeOf<Piece>());
             Debug.Log(UnsafeUtility.SizeOf<Node>());
             tree = new NativeList<Node>(1_000_000, Allocator.Persistent) {
                 new Node(-1)

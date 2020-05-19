@@ -17,18 +17,18 @@ namespace Hikari.AI {
         private const ushort FilledLine = 0b11111_11111;
         private const int Length = 20;
 
-        private static readonly int[] FullTSpinCheckPoints = {
-            0, 0, 2, 0,
-            0, 2, 0, 0,
-            2, 2, 0, 2,
-            2, 0, 2, 2
+        private static readonly int4[] FullTSpinCheckPoints = {
+            new int4(0, 0, 2, 0),
+            new int4(0, 2, 0, 0),
+            new int4( 2, 2, 0, 2),
+            new int4(2, 0, 2, 2)
         };
 
-        private static readonly int[] MiniTSpinCheckPoints = {
-            2, 2, 0, 2,
-            2, 0, 2, 2,
-            0, 0, 2, 0,
-            0, 2, 0, 0
+        private static readonly int4[] MiniTSpinCheckPoints = {
+            new int4( 2, 2, 0, 2),
+            new int4(2, 0, 2, 2),
+            new int4(0, 0, 2, 0),
+            new int4(0, 2, 0, 0)
         };
 
         public SimpleBoard(NativeArray<ushort> cells) {
@@ -211,24 +211,22 @@ namespace Hikari.AI {
 
         public TSpinStatus CheckTSpin(Piece piece, int rotation) {
             if (piece.kind != PieceKind.T) return TSpinStatus.None;
-            var checkIndex = piece.spin * 4;
             var tSpinCheckCount = 0;
-            if (Occupied(FullTSpinCheckPoints[checkIndex] + piece.x, FullTSpinCheckPoints[checkIndex + 1] + piece.y)) {
+            var pos = new int2(piece.x,piece.y);
+            if (Occupied(FullTSpinCheckPoints[piece.spin].xy + pos)) {
                 tSpinCheckCount++;
             }
 
-            if (Occupied(FullTSpinCheckPoints[checkIndex + 2] + piece.x,
-                FullTSpinCheckPoints[checkIndex + 3] + piece.y)) {
+            if (Occupied(FullTSpinCheckPoints[piece.spin].zw + pos)) {
                 tSpinCheckCount++;
             }
 
             var miniTSpinCheckCount = 0;
-            if (Occupied(MiniTSpinCheckPoints[checkIndex] + piece.x, MiniTSpinCheckPoints[checkIndex + 1] + piece.y)) {
+            if (Occupied(MiniTSpinCheckPoints[piece.spin].xy + pos)) {
                 miniTSpinCheckCount++;
             }
 
-            if (Occupied(MiniTSpinCheckPoints[checkIndex + 2] + piece.x,
-                MiniTSpinCheckPoints[checkIndex + 3] + piece.y)) {
+            if (Occupied(MiniTSpinCheckPoints[piece.spin].zw + pos)) {
                 miniTSpinCheckCount++;
             }
 
@@ -240,7 +238,7 @@ namespace Hikari.AI {
             } else return TSpinStatus.None;
         }
 
-        public SimpleLockResult Lock(in Piece piece, Allocator alloc, out SimpleBoard output) {
+        public SimpleLockResult Lock(in Piece piece, Allocator alloc, out SimpleBoard output) { //todo
             var board = AddPiece(piece);
         
             var clearedLines = new NativeList<int>(4, Allocator.Temp);

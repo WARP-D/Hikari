@@ -2,8 +2,8 @@ namespace Hikari.AI {
     public struct Node {
         public bool valid;
         
-        public int parent;
         public bool holdUsed;
+        public int parent;
         public ChildrenRef children;
         public Evaluation eval;
 
