@@ -1,10 +1,10 @@
 using Hikari.Puzzle;
 
 namespace Hikari.AI {
-    public struct ExpandResult {
-        public Piece placement;
-        public int parentIndex;
-        public bool holdUsed;
+    public readonly struct ExpandResult {
+        public readonly Piece placement;
+        public readonly int parentIndex;
+        public readonly bool holdUsed;
 
         public ExpandResult(int parentIndex, Piece placement, bool holdUsed) {
             this.parentIndex = parentIndex;
