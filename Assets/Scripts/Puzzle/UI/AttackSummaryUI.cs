@@ -2,7 +2,7 @@ using DG.Tweening;
 using TMPro;
 using UnityEngine;
 
-namespace Cyanite.Puzzle.UI {
+namespace Hikari.Puzzle.UI {
     public class AttackSummaryUI : MonoBehaviour {
         [SerializeField] private TMP_Text text;
         private RectTransform textTr;

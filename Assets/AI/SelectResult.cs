@@ -1,6 +1,6 @@
-using Cyanite.Puzzle;
+using Hikari.Puzzle;
 
-namespace Cyanite.AI {
+namespace Hikari.AI {
     public readonly struct SelectResult {
         public readonly bool valid;
         public readonly IndexedNode iNode;

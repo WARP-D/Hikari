@@ -4,7 +4,7 @@ using TMPro;
 using UniRx;
 using UnityEngine;
 
-namespace Cyanite.Puzzle {
+namespace Hikari.Puzzle {
     public class MatchBehaviour : MonoBehaviour {
         private Match match;
         [SerializeField] private GameView gameView1;

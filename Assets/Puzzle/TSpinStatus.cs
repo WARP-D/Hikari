@@ -1,4 +1,4 @@
-namespace Cyanite.Puzzle {
+namespace Hikari.Puzzle {
     public enum TSpinStatus : byte {
         None,
         Mini,

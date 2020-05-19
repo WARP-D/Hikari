@@ -1,6 +1,6 @@
 using System;
 
-namespace Cyanite.Puzzle {
+namespace Hikari.Puzzle {
     public struct Bag {
         private byte value;
         private byte count;

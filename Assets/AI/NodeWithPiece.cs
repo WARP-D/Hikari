@@ -1,6 +1,6 @@
-using Cyanite.Puzzle;
+using Hikari.Puzzle;
 
-namespace Cyanite.AI {
+namespace Hikari.AI {
     public readonly struct NodeWithPiece {
         public readonly Node node;
         public readonly Piece piece;

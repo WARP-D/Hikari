@@ -1,6 +1,6 @@
-using Cyanite.Puzzle;
+using Hikari.Puzzle;
 
-namespace Cyanite.AI {
+namespace Hikari.AI {
     public struct ExpandResult {
         public Piece placement;
         public int parentIndex;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Cyanite.Puzzle {
+namespace Hikari.Puzzle {
     public static class SRS {
         private static readonly Dictionary<int, Vector2Int[]> RotationTable = new Dictionary<int, (int, int)[]> {
             {01, new[] {(0, 0), (-1, 0), (-1, 1), (0, -2), (-1, -2)}},

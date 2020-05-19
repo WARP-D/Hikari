@@ -4,7 +4,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
-namespace Cyanite.Puzzle {
+namespace Hikari.Puzzle {
     public readonly struct Piece : IEquatable<Piece> {
         public readonly PieceKind kind;
         public readonly sbyte x;

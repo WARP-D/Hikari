@@ -1,4 +1,4 @@
-namespace Cyanite.Addons.ColdClear {
+namespace Hikari.Addons.ColdClear {
     public enum CCPiece : uint {
         CC_I,
         CC_T,

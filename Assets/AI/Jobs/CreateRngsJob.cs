@@ -3,7 +3,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-namespace Cyanite.AI.Jobs {
+namespace Hikari.AI.Jobs {
     [BurstCompile]
     public struct CreateRngsJob : IJob {
         [ReadOnly, DeallocateOnJobCompletion] public NativeArray<Random> rng;

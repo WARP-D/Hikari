@@ -1,7 +1,7 @@
 using System;
-using static Cyanite.Puzzle.PieceKind;
+using static Hikari.Puzzle.PieceKind;
 
-namespace Cyanite.Puzzle {
+namespace Hikari.Puzzle {
     public enum PieceKind : byte {
         I,O,T,J,L,S,Z
     }

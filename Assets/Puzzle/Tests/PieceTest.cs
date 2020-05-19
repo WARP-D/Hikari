@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using Cyanite.Puzzle;
+using Hikari.Puzzle;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;

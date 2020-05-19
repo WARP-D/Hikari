@@ -1,7 +1,7 @@
 using System;
-using Cyanite.Puzzle;
+using Hikari.Puzzle;
 
-namespace Cyanite.Addons.ColdClear {
+namespace Hikari.Addons.ColdClear {
     internal class ColdClearBot : IDisposable {
         private IntPtr bot;
         public ColdClearBot() {

@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace Cyanite.Addons.ColdClear {
+namespace Hikari.Addons.ColdClear {
     [StructLayout(LayoutKind.Sequential)]
     public struct CCMove {
         /// <summary>

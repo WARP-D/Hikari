@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Cyanite.Puzzle {
+namespace Hikari.Puzzle {
     public class FallingPieceBehaviour : MonoBehaviour {
         public bool transparent;
         public Piece piece;

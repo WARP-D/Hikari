@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Cyanite.Puzzle {
+namespace Hikari.Puzzle {
     public readonly struct LockResult {
         public readonly PlacementKind placementKind;
         public readonly bool b2b;

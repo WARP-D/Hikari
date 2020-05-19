@@ -1,4 +1,4 @@
-namespace Cyanite.AI {
+namespace Hikari.AI {
     public struct Move {
         
     }

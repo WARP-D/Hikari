@@ -1,6 +1,6 @@
-using Cyanite.Puzzle;
+using Hikari.Puzzle;
 
-namespace Cyanite.AI {
+namespace Hikari.AI {
     public readonly struct SimpleLockResult {
         public readonly PlacementKind placementKind;
         public readonly bool b2b;

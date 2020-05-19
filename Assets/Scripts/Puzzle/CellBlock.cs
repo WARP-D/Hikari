@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Cyanite.Puzzle {
+namespace Hikari.Puzzle {
     public class CellBlock : MonoBehaviour {
         public static Material[] materials = new Material[15];//I,O,T,J,L,S,Z,Gbg
 

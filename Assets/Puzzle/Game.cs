@@ -5,7 +5,7 @@ using UniRx;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Cyanite.Puzzle {
+namespace Hikari.Puzzle {
     public class Game {
         private Match match;
         public PlayerInfo Player { get; private set; }

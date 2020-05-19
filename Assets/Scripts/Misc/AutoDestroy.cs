@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Cyanite.Misc {
+namespace Hikari.Misc {
     public class AutoDestroy : MonoBehaviour {
         [SerializeField] private float destroyDelay;
 

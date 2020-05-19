@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
-using Cyanite.Puzzle;
+using Hikari.Puzzle;
 using UniRx;
 using UnityEngine;
 
-namespace Cyanite.Addons.ColdClear {
+namespace Hikari.Addons.ColdClear {
     public class ColdClearController : MonoBehaviour, IController {
         private Game game;
         private ColdClearBot bot;

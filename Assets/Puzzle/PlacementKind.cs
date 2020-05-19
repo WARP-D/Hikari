@@ -1,7 +1,7 @@
 using System;
-using static Cyanite.Puzzle.PlacementKind;
+using static Hikari.Puzzle.PlacementKind;
 
-namespace Cyanite.Puzzle {
+namespace Hikari.Puzzle {
     public enum PlacementKind : byte {
         None,
         Clear1,

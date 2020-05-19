@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Cyanite.Puzzle.UI {
+namespace Hikari.Puzzle.UI {
     public class RenVisionUI : MonoBehaviour {
         [SerializeField] private Image bg0;
         [SerializeField] private Image bg1;

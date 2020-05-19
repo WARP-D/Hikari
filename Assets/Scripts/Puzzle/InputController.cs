@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Cyanite.Puzzle {
+namespace Hikari.Puzzle {
     public class InputController : MonoBehaviour, IController {
         [SerializeField] private int DAS = 7;
         [SerializeField] private int ARR = 2;

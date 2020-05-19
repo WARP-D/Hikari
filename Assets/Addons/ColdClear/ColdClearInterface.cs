@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Cyanite.Addons.ColdClear {
+namespace Hikari.Addons.ColdClear {
     internal static class ColdClearInterface {
         [DllImport("libcold_clear")]
         public static extern IntPtr cc_launch_async(CCOptions options, CCWeights weights);

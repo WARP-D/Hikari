@@ -1,6 +1,6 @@
 using System;
 
-namespace Cyanite.AI {
+namespace Hikari.AI {
     public struct ChildrenRef : IEquatable<ChildrenRef> {
         public int start;
         public int length;

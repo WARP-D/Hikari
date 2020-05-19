@@ -1,8 +1,8 @@
 {
-    "name": "Cyanite.Utils",
+    "name": "Hikari.Addons.ColdClear",
     "references": [
-        "GUID:d8b63aba1907145bea998dd612889d6b",
-        "GUID:e04e6c86a9f3947eb95fded39f9e60cc"
+        "GUID:560b04d1a97f54a4e82edc0cbbb69285",
+        "GUID:cdcef4ac803324e4da69e7919529c9c5"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,11 +1,11 @@
 using System;
-using Cyanite.Puzzle;
-using Cyanite.Utils;
+using Hikari.Utils;
+using Hikari.Puzzle;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 
-namespace Cyanite.AI {
+namespace Hikari.AI {
     public unsafe struct SimpleBoard {
         public fixed ushort cells[Length];
         public readonly byte backToBack;

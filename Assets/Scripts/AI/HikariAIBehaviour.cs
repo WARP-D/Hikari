@@ -1,13 +1,13 @@
-using Cyanite.Puzzle;
+using Hikari.Puzzle;
 using UniRx;
 using UnityEngine;
 
-namespace Cyanite.AI {
-    public class CyaniteAIBehaviour : MonoBehaviour, IController {
-        private CyaniteAI ai;
+namespace Hikari.AI {
+    public class HikariAIBehaviour : MonoBehaviour, IController {
+        private HikariAI ai;
         private Game game;
         private void Awake() {
-            ai = new CyaniteAI();
+            ai = new HikariAI();
         }
 
         private void Start() {

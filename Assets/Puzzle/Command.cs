@@ -1,6 +1,6 @@
 using System;
 
-namespace Cyanite.Puzzle {
+namespace Hikari.Puzzle {
     [Flags]
     public enum Command : byte {
         Left = 0x1,

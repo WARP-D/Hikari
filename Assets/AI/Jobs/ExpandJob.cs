@@ -1,10 +1,10 @@
-using Cyanite.Puzzle;
+using Hikari.Puzzle;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-namespace Cyanite.AI.Jobs {
+namespace Hikari.AI.Jobs {
     [BurstCompile]
     public struct ExpandJob : IJobParallelFor {
         [ReadOnly, DeallocateOnJobCompletion] public NativeArray<bool> useHold;

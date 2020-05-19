@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using Cyanite.Utils;
+using Hikari.Utils;
 using UnityEngine;
 
-namespace Cyanite.Puzzle {
+namespace Hikari.Puzzle {
     public class Board {
         public Row[] row = new Row[40];
         public uint ren;

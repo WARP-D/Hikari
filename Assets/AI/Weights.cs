@@ -1,6 +1,6 @@
 using Unity.Mathematics;
 
-namespace Cyanite.AI {
+namespace Hikari.AI {
     public struct Weights {
         public int4 clears;
         public int4 tSpins;

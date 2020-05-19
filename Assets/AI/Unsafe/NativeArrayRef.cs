@@ -2,7 +2,7 @@ using System;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace Cyanite.AI.Unsafe {
+namespace Hikari.AI.Unsafe {
     public readonly unsafe struct NativeArrayRef<T> : IDisposable where T : struct {
         private readonly void* ptr;
         private readonly int length;

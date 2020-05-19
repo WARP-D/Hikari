@@ -1,12 +1,12 @@
 using System.Linq;
-using Cyanite.Puzzle.UI;
+using Hikari.Puzzle.UI;
 using TMPro;
 using UniRx;
 using UniRx.Async;
 using UnityEngine;
 using UnityEngine.VFX;
 
-namespace Cyanite.Puzzle {
+namespace Hikari.Puzzle {
     public class GameView : MonoBehaviour {
         public Game game;
 

@@ -2,7 +2,7 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 
-namespace Cyanite.AI.Jobs {
+namespace Hikari.AI.Jobs {
     [BurstCompile]
     public struct RebuildValueBoardJob : IJobParallelFor {
         [ReadOnly] public NativeArray<SimpleBoard> input;

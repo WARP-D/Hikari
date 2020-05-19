@@ -1,8 +1,8 @@
-using Cyanite.Puzzle;
+using Hikari.Puzzle;
 using Unity.Collections;
 using Unity.Mathematics;
 
-namespace Cyanite.AI {
+namespace Hikari.AI {
     public static class PathFinder {
         // public static NativeArray<Command> FindPath(ref SimpleBoard board, Piece piece) {
         //     

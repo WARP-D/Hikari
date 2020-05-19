@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using Cyanite.Puzzle;
+using Hikari.Puzzle;
 using NUnit.Framework;
 using UnityEngine;
 

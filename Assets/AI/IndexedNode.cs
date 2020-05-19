@@ -1,4 +1,4 @@
-namespace Cyanite.AI {
+namespace Hikari.AI {
     public readonly struct IndexedNode {
         public readonly int index;
         public readonly Node node;

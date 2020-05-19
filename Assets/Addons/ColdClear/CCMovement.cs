@@ -1,4 +1,4 @@
-namespace Cyanite.Addons.ColdClear {
+namespace Hikari.Addons.ColdClear {
     public enum CCMovement : uint {
         CC_LEFT,
         CC_RIGHT,

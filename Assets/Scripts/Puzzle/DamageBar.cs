@@ -1,7 +1,7 @@
 using DG.Tweening;
 using UnityEngine;
 
-namespace Cyanite.Puzzle {
+namespace Hikari.Puzzle {
     public class DamageBar : MonoBehaviour {
         private Tween tween;
         public uint Amount {

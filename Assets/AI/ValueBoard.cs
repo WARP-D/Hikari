@@ -1,7 +1,7 @@
-using Cyanite.Puzzle;
+using Hikari.Puzzle;
 using Unity.Collections;
 
-namespace Cyanite.AI {
+namespace Hikari.AI {
     public struct ValueBoard {
         public NativeArray<ushort> cells;
         public uint ren;

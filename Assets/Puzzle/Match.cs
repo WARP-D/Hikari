@@ -4,7 +4,7 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Cyanite.Puzzle {
+namespace Hikari.Puzzle {
     public class Match : IDisposable {
         public bool Paused { get; set; }
         public Game game1;
@@ -22,7 +22,7 @@ namespace Cyanite.Puzzle {
             eventSubject = new Subject<IMatchEvent>();
             EventStream = eventSubject.AsObservable();
             game1 = new Game(this, new Game.PlayerInfo {ID = 0, Name = "Player1", Kind = PlayerKind.Human});
-            game2 = new Game(this, new Game.PlayerInfo {ID = 1, Name = "Cyanite", Kind = PlayerKind.AI});
+            game2 = new Game(this, new Game.PlayerInfo {ID = 1, Name = "Hikari", Kind = PlayerKind.AI});
             games = new[] {game1, game2};
             updateSubscription = Observable.EveryUpdate().Where(l => !Paused).Subscribe(Countdown);
 

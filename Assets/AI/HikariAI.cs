@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Cyanite.AI.Jobs;
-using Cyanite.Puzzle;
+using Hikari.AI.Jobs;
+using Hikari.Puzzle;
 using UniRx.Async;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -11,8 +11,8 @@ using Unity.Mathematics;
 using UnityEngine;
 using Random = Unity.Mathematics.Random;
 
-namespace Cyanite.AI {
-    public class CyaniteAI : IDisposable {
+namespace Hikari.AI {
+    public class HikariAI : IDisposable {
         private NativeList<Node> tree;
         private NativeList<SimpleBoard> boards;
         private int root;

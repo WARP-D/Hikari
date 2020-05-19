@@ -3,7 +3,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 
-namespace Cyanite.AI.Jobs {
+namespace Hikari.AI.Jobs {
     [BurstCompile]
     public unsafe struct EvaluateJob : IJobParallelForDefer {
         [ReadOnly] public NativeArray<SimpleBoard> boards;

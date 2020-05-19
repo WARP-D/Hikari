@@ -1,4 +1,4 @@
-namespace Cyanite.Addons.ColdClear {
+namespace Hikari.Addons.ColdClear {
     public enum CCMovementMode : uint {
         CC_0G,
         CC_20G,
