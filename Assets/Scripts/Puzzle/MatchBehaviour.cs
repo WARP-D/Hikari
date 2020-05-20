@@ -14,7 +14,7 @@ namespace Hikari.Puzzle {
         [SerializeField] private List<TMP_Text> countdownTexts;
         
         private void Start() {
-            match = new Match(gameObject);
+            match = new Match();
             gameView1.game = match.game1;
             gameView2.game = match.game2;
             gameView1.Init();

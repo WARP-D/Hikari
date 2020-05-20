@@ -18,7 +18,7 @@ namespace Hikari.Puzzle {
         public IObservable<IMatchEvent> EventStream { get; }
         private readonly Subject<IMatchEvent> eventSubject;
 
-        public Match(GameObject go) {
+        public Match() {
             eventSubject = new Subject<IMatchEvent>();
             EventStream = eventSubject.AsObservable();
             game1 = new Game(this, new Game.PlayerInfo {ID = 0, Name = "Player1", Kind = PlayerKind.Human});
@@ -63,7 +63,7 @@ namespace Hikari.Puzzle {
         }
 
         public void Dispose() {
-            eventSubject.OnCompleted();
+            eventSubject.Dispose();
             // updateSubscription.Dispose();
         }
 
