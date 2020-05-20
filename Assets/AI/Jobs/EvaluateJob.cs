@@ -17,8 +17,8 @@ namespace Hikari.AI.Jobs {
             var pl = ex.placement;
             var w = weight[0];
 
-            var defense = 0;
-            var offense = 0;
+            var defense = 0f;
+            var offense = 0f;
 
             var board = boards[ex.parentIndex].AddPieceFast(pl,pieceShapes);
             var columns = stackalloc int[10];
@@ -29,7 +29,7 @@ namespace Hikari.AI.Jobs {
             var bumpiness = CalcBumpiness(ref maxHeights, holeColumn);
             
             defense += bumpiness.x * w.bumpSum;
-            defense += (int) math.ceil(math.pow(bumpiness.y, 1.3f) * w.bumpMax);
+            defense += math.pow(bumpiness.y, 1.3f) * w.bumpMax;
 
             defense += 200 - 10 * CalcMaxHeight(ref board);
 
