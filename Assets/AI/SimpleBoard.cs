@@ -197,13 +197,15 @@ namespace Hikari.AI {
             
             var newBoard = new SimpleBoard();
             
+            fixed(ushort* cPtr = cells) UnsafeUtility.MemCpy(newBoard.cells,cPtr,Length);
+            
             for (var i = 0; i < 4; i++) {
                 var y = i + piece.y;
             
                 if (y >= Length) break;
                 if (y < 0) continue;
             
-                newBoard.cells[y] = (ushort) (cells[y] | shape[i]);
+                newBoard.cells[y] = (ushort) (newBoard.cells[y] | shape[i]);
             }
             
             return newBoard;
