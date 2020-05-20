@@ -22,10 +22,8 @@ namespace Hikari.Puzzle {
             countdownTexts.ForEach(t => t.text = "");
             countdownSubscription = match.EventStream.OfType<object, Match.CountdownEvent>().Subscribe(e => {
                 if (e.count > 0) {
-                    Debug.Log(e.count.ToString());
                     countdownTexts.ForEach(t => t.text = e.count.ToString());
                 } else if (e.count == 0) {
-                    Debug.Log("Go");
                     countdownTexts.ForEach(t => t.text = "GO");
                     Observable.TimerFrame(60).Subscribe(l => countdownTexts.ForEach(t => t.text = "")).AddTo(this);
                 }

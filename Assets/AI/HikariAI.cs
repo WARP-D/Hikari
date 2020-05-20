@@ -37,19 +37,20 @@ namespace Hikari.AI {
 
         private JobHandle jobHandle;
         private bool scheduled;
+        private int completionDelay;
+
+        private const int MaxCompletionDelay = 3;
 
         private bool requestNextMove;
         private Move? lastMove;
 
-        private int length;
+        public int length;
 
         public bool useHold = false;
 
         public int ParallelCount { get; set; } = 7*50;
 
         public void Start() {
-            Debug.Log(UnsafeUtility.SizeOf<Piece>());
-            Debug.Log(UnsafeUtility.SizeOf<Node>());
             tree = new NativeList<Node>(1_000_000, Allocator.Persistent) {
                 new Node(-1)
             };
@@ -64,6 +65,17 @@ namespace Hikari.AI {
         public void Update() {
             // Complete previous job
             if (scheduled) {
+                if (!jobHandle.IsCompleted) {
+                    if (completionDelay < MaxCompletionDelay) {
+                        completionDelay++;
+                        Debug.Log($"Jobs are not completed, I'll delay completion for {MaxCompletionDelay - completionDelay} more frame{(MaxCompletionDelay - completionDelay == 1 ? "" : "s")}");
+                        return;
+                    }
+
+                    Debug.LogWarning("Jobs are still not completed, but I force to complete");
+                }
+                completionDelay = 0;
+                
                 jobHandle.Complete();
                 if (requestNextMove) {
                     //todo
@@ -159,7 +171,7 @@ namespace Hikari.AI {
             scheduled = true;
             
             
-            Debug.Log(length);
+            // Debug.Log(length);
         }
 
         public void AddNextPiece(PieceKind pieceKind) {

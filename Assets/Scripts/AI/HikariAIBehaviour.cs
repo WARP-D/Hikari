@@ -1,4 +1,5 @@
 using Hikari.Puzzle;
+using TMPro;
 using UniRx;
 using UnityEngine;
 
@@ -6,6 +7,9 @@ namespace Hikari.AI {
     public class HikariAIBehaviour : MonoBehaviour, IController {
         private HikariAI ai;
         private Game game;
+
+        [SerializeField] private TMP_Text length;
+        
         private void Awake() {
             ai = new HikariAI();
         }
@@ -16,12 +20,12 @@ namespace Hikari.AI {
 
             game.EventStream.OfType<Game.IGameEvent, Game.QueueUpdatedEvent>().Subscribe(e => {
                 ai.AddNextPiece(e.kind);
-                Debug.Log(e.kind);
             }).AddTo(this);
         }
 
         private void Update() {
             ai.Update();
+            length.text = ai.length.ToString();
         }
 
         private void OnDestroy() {
