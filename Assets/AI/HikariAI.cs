@@ -101,17 +101,21 @@ namespace Hikari.AI {
             // Prepare queue & tree
             nextPiecesArray = nextPieces.ToArray(Allocator.TempJob);
 
+            PrepareAndScheduleJobs();
+        }
+
+        private void PrepareAndScheduleJobs() {
             var parallelCount = math.min(ParallelCount, tree.Length); //todo is this the right way?
-            
+
             rngs = new NativeArray<Random>(ParallelCount, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
             createRngsJob = new CreateRngsJob {
-                rng = new NativeArray<Random>(1,Allocator.TempJob,NativeArrayOptions.UninitializedMemory) {
+                rng = new NativeArray<Random>(1, Allocator.TempJob, NativeArrayOptions.UninitializedMemory) {
                     [0] = new Random((uint) UnityEngine.Random.Range(0, int.MaxValue))
                 },
                 outputs = rngs
             };
             jobHandle = createRngsJob.Schedule();
-            
+
             selectedArray = new NativeArray<SelectResult>(parallelCount, Allocator.TempJob);
             selectJob = new SelectJob {
                 tree = tree.AsDeferredJobArray(),
@@ -122,14 +126,14 @@ namespace Hikari.AI {
                 rands = rngs,
                 pieceQueue = nextPiecesArray,
                 selected = selectedArray,
-                depths = new NativeArray<int>(parallelCount,Allocator.TempJob),
+                depths = new NativeArray<int>(parallelCount, Allocator.TempJob),
                 retryCounts = new NativeArray<int>(parallelCount, Allocator.TempJob)
             };
-            jobHandle = selectJob.Schedule(parallelCount,1,jobHandle);
-            
-            expandedList = new NativeList<ExpandResult>(parallelCount * 300,Allocator.TempJob);
+            jobHandle = selectJob.Schedule(parallelCount, 1, jobHandle);
+
+            expandedList = new NativeList<ExpandResult>(parallelCount * 300, Allocator.TempJob);
             expandJob = new ExpandJob {
-                useHold = new NativeArray<bool>(1,Allocator.TempJob) {
+                useHold = new NativeArray<bool>(1, Allocator.TempJob) {
                     [0] = useHold
                 },
                 pieceShapes = pieceShapes,
@@ -138,11 +142,11 @@ namespace Hikari.AI {
                 expandResultWriter = expandedList.AsParallelWriter()
             };
             jobHandle = expandJob.Schedule(parallelCount, 1, jobHandle);
-            
+
             evaluations = new NativeArray<int4>(parallelCount * 300, Allocator.TempJob);
             evaluateJob = new EvaluateJob {
                 inputs = expandedList.AsDeferredJobArray(),
-                weight = new NativeArray<Weights>(1,Allocator.TempJob) {
+                weight = new NativeArray<Weights>(1, Allocator.TempJob) {
                     [0] = Weights.Default
                 },
                 pieceShapes = pieceShapes,
@@ -151,7 +155,7 @@ namespace Hikari.AI {
             };
             jobHandle = evaluateJob.Schedule(expandedList, 1, jobHandle);
 
-            expandedMap = new NativeMultiHashMap<int, NodeWithPiece>(parallelCount * 300,Allocator.TempJob);
+            expandedMap = new NativeMultiHashMap<int, NodeWithPiece>(parallelCount * 300, Allocator.TempJob);
             reorderChildrenJob = new ReorderChildrenJob {
                 expandResults = expandedList,
                 evaluations = evaluations,
@@ -159,7 +163,7 @@ namespace Hikari.AI {
                 map = expandedMap.AsParallelWriter()
             };
             jobHandle = reorderChildrenJob.Schedule(expandedList, 4, jobHandle);
-            
+
             treeWriteJob = new TreeWriteJob {
                 map = expandedMap,
                 tree = tree,
@@ -177,9 +181,6 @@ namespace Hikari.AI {
 
             JobHandle.ScheduleBatchedJobs();
             scheduled = true;
-            
-            
-            // Debug.Log(length);
         }
 
         public void AddNextPiece(PieceKind pieceKind) {
