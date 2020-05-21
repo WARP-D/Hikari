@@ -10,15 +10,15 @@ namespace Hikari.AI.Jobs {
         [ReadOnly] public NativeArray<ExpandResult> inputs;
         [ReadOnly,DeallocateOnJobCompletion] public NativeArray<Weights> weight;
         [ReadOnly] public NativeArray<int4x4> pieceShapes;
-        [WriteOnly] public NativeArray<Evaluation> results;
+        [WriteOnly] public NativeArray<int4> results;
 
         public void Execute(int index) {
             var ex = inputs[index];
             var pl = ex.placement;
             var w = weight[0];
 
-            var defense = 0f;
-            var offense = 0f;
+            var defense = 0;
+            var offense = 0;
 
             var board = boards[ex.parentIndex].AddPieceFast(pl,pieceShapes);
             var columns = stackalloc int[10];
@@ -28,12 +28,12 @@ namespace Hikari.AI.Jobs {
             var holeColumn = CalcHolePos(ref maxHeights);
             var bumpiness = CalcBumpiness(ref maxHeights, holeColumn);
             
-            defense += bumpiness.x * w.bumpSum;
-            defense += math.pow(bumpiness.y, 1.3f) * w.bumpMax;
+            defense += (int)(bumpiness.x * w.bumpSum);
+            defense += (int) (math.pow(bumpiness.y, 1.3f) * w.bumpMax);
 
             defense += 200 - 10 * CalcMaxHeight(ref board);
 
-            results[index] = new Evaluation(defense,offense);
+            results[index] = new int4(defense,offense,0,0);
         }
 
         private static void GetColumns(ref SimpleBoard board, int* columns, byte* cMaxHeights) {

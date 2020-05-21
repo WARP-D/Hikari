@@ -7,7 +7,7 @@ namespace Hikari.AI.Jobs {
     [BurstCompile]
     public struct ReorderChildrenJob : IJobParallelForDefer {
         [ReadOnly] public NativeList<ExpandResult> expandResults;
-        [ReadOnly] public NativeArray<Evaluation> evaluations;
+        [ReadOnly] public NativeArray<int4> evaluations;
         [ReadOnly] public NativeArray<int4x4> pieceShapes;
         [WriteOnly] public NativeMultiHashMap<int, NodeWithPiece>.ParallelWriter map;
         

@@ -54,7 +54,7 @@ namespace Hikari.AI.Jobs {
                     
                 var child = tree[children.start + j];
                     
-                var score = child.eval.Sum();
+                var score = child.evalSelf.x + child.evalSelf.y + child.evalSelf.z + child.evalSelf.w;
                     
                 if (child.children.length > 0 && depth < pieceQueue.Length-1) {
                     score += 3000;

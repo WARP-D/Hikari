@@ -25,12 +25,13 @@ namespace Hikari.AI {
         private EvaluateJob evaluateJob;
         private ReorderChildrenJob reorderChildrenJob;
         private TreeWriteJob treeWriteJob;
+        private BackupJob backupJob;
 
         private NativeArray<Random> rngs;
         private NativeArray<SelectResult> selectedArray;
         private NativeList<ExpandResult> expandedList;
         private NativeArray<PieceKind> nextPiecesArray;
-        private NativeArray<Evaluation> evaluations;
+        private NativeArray<int4> evaluations;
         private NativeMultiHashMap<int, NodeWithPiece> expandedMap;
 
         private NativeArray<int4x4> pieceShapes;
@@ -138,7 +139,7 @@ namespace Hikari.AI {
             };
             jobHandle = expandJob.Schedule(parallelCount, 1, jobHandle);
             
-            evaluations = new NativeArray<Evaluation>(parallelCount * 300, Allocator.TempJob);
+            evaluations = new NativeArray<int4>(parallelCount * 300, Allocator.TempJob);
             evaluateJob = new EvaluateJob {
                 inputs = expandedList.AsDeferredJobArray(),
                 weight = new NativeArray<Weights>(1,Allocator.TempJob) {
@@ -166,6 +167,13 @@ namespace Hikari.AI {
                 pieceShapes = pieceShapes
             };
             jobHandle = treeWriteJob.Schedule(jobHandle);
+
+            backupJob = new BackupJob {
+                expandResults = expandedList,
+                evaluations = evaluations,
+                tree = tree.AsDeferredJobArray()
+            };
+            jobHandle = backupJob.Schedule(jobHandle);
 
             JobHandle.ScheduleBatchedJobs();
             scheduled = true;
