@@ -8,7 +8,7 @@ namespace Hikari.AI {
         public int parent;
         public ChildrenRef children;
         public int4 evalSelf;
-        public int4 evalAccumulated;
+        public int4 evalSum;
         public int visits;
 
         public Node(int parent) {
@@ -16,7 +16,7 @@ namespace Hikari.AI {
             this.parent = parent;
             children = default;
             evalSelf = default;
-            evalAccumulated = default;
+            evalSum = default;
             holdUsed = false;
             visits = 1;
         }
@@ -26,7 +26,7 @@ namespace Hikari.AI {
             this.parent = parent;
             children = default;
             evalSelf = evaluation;
-            evalAccumulated = default;
+            evalSum = default;
             holdUsed = false;
             visits = 1;
         }

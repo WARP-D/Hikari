@@ -16,7 +16,7 @@ namespace Hikari.AI.Jobs {
                 var eval = evaluations[i];
                 while (true) {
                     var node = tree[parent];
-                    node.evalAccumulated += eval;
+                    node.evalSum += eval;
                     node.visits++;
                     tree[parent] = node;
 

@@ -46,28 +46,29 @@ namespace Hikari.AI.Jobs {
             retryCounts[i] = retryCount;
         }
 
-        private unsafe void Select(ref IndexedNode current, int depth, ref Random rng) { // todo implement correct AlphaGoZero-like selection strategy
+        private unsafe void Select(ref IndexedNode current, int depth, ref Random rng) {
             var children = current.node.children;
             var weights = stackalloc float[children.length];
+            // var weights = new NativeArray<float>(children.length,Allocator.Temp);
             var sum = 0f;
+            var min = 0f;
             for (var j = 0; j < children.length; j++) {
-                    
                 var child = tree[children.start + j];
-                    
-                var score = child.evalSelf.x + child.evalSelf.y + child.evalSelf.z + child.evalSelf.w;
-                    
-                if (child.children.length > 0 && depth < pieceQueue.Length-1) {
-                    score += 3000;
-                }
 
-                weights[j] = score + BaseScore;
-                sum += score;
+                var q = child.visits != 0 ? SumInt4(child.evalSum / child.visits) : 0;
+                var u = 1f * math.sqrt(current.node.visits) / (1 + child.visits);
+                var s = 1 * 10 * SumInt4(current.node.evalSelf);
+
+                var a = q + u + s;
+                weights[j] = a;
+                sum += a;
+                if (a < min) min = a;
             }
 
-            sum += BaseScore * children.length;
+            sum += -min * children.length;
 
             for (var j = 0; j < children.length; j++) {
-                weights[j] = weights[j] / sum;
+                weights[j] = (weights[j] - min) / sum;
             }
 
             var rand = rng.NextFloat(0f,1f);
@@ -81,6 +82,12 @@ namespace Hikari.AI.Jobs {
                     break;
                 }
             }
+
+            // weights.Dispose();
+        }
+
+        private int SumInt4(int4 i4) {
+            return i4.x + i4.y + i4.z + i4.w;
         }
     }
 }
