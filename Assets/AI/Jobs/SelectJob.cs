@@ -37,7 +37,7 @@ namespace Hikari.AI.Jobs {
                     goto exec;
                 }
 
-                Select(ref current, ref depth, ref rng);
+                Select(ref current, depth, ref rng);
             }
 
             var selectResult = new SelectResult(current, boards[current.index].holdingSomething ? pieceQueue[depth + 1] : pieceQueue[depth]);
@@ -46,7 +46,7 @@ namespace Hikari.AI.Jobs {
             retryCounts[i] = retryCount;
         }
 
-        private unsafe void Select(ref IndexedNode current, ref int depth, ref Random rng) {
+        private unsafe void Select(ref IndexedNode current, int depth, ref Random rng) { // todo implement correct AlphaGoZero-like selection strategy
             var children = current.node.children;
             var weights = stackalloc float[children.length];
             var sum = 0f;
