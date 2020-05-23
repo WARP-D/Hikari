@@ -15,7 +15,7 @@ namespace Hikari.AI.Jobs {
             var keys = map.GetKeyArray(Allocator.Temp);
             for (var i = 0; i < keys.Length; i++) {
                 var n = tree[keys[i]];
-                if (n.children != default) continue;
+                if (n.children.length > 0) continue;
                 
                 var start = tree.Length;
                 var values = map.GetValuesForKey(keys[i]);
