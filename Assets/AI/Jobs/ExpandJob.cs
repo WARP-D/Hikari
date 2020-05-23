@@ -1,6 +1,7 @@
 using Hikari.Puzzle;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 
@@ -13,29 +14,37 @@ namespace Hikari.AI.Jobs {
         [ReadOnly] public NativeArray<SimpleBoard> boards;
         public NativeList<ExpandResult>.ParallelWriter expandResultWriter;
 
-        public void Execute(int index) {
+        public unsafe void Execute(int index) {
             if (!selected[index].valid) return;
             if (!selected[index].node.valid) return;
             
-            var temp = new NativeList<ExpandResult>(100, Allocator.Temp);
+            var board = boards[index];
+            var moves = NextPlacementsGenerator.Generate(ref board, new Piece(selected[index].currentPiece), pieceShapes);
 
-            var spins = selected[index].currentPiece == PieceKind.O ? 1 : 4;
-
-            for (sbyte y = -3; y < 19; y++) {
-                for (sbyte x = -3; x < 9; x++) {
-                    for (sbyte s = 0; s < spins; s++) {
-                        var piece = new Piece(selected[index].currentPiece, x, y, s);
-                        
-                        if (!boards[selected[index].index].CollidesFast(piece,pieceShapes)
-                                    && boards[selected[index].index].GroundedFast(piece,pieceShapes)) {
-                            temp.Add(new ExpandResult(selected[index].index,piece, false));
-                        }
-                    }
+            // var spins = selected[index].currentPiece == PieceKind.O ? 1 : 4;
+            //
+            // for (sbyte y = -3; y < 19; y++) {
+            //     for (sbyte x = -3; x < 9; x++) {
+            //         for (sbyte s = 0; s < spins; s++) {
+            //             var piece = new Piece(selected[index].currentPiece, x, y, s);
+            //             
+            //             if (!boards[selected[index].index].CollidesFast(piece,pieceShapes)
+            //                         && boards[selected[index].index].GroundedFast(piece,pieceShapes)) {
+            //                 temp.Add(new ExpandResult(selected[index].index,piece, false));
+            //             }
+            //         }
+            //     }
+            // }
+            var keys = moves.GetKeyArray(Allocator.Temp);
+            var ret = new NativeArray<ExpandResult>(keys.Length, Allocator.Temp,NativeArrayOptions.UninitializedMemory);
+            for (var i = 0; i < keys.Length; i++) {
+                if (moves.TryGetValue(keys[i], out var mv)) {
+                    ret[i] = new ExpandResult(selected[index].index, mv.piece, false);
                 }
             }
-            
-            expandResultWriter.AddRangeNoResize(temp);
-            temp.Dispose();
+            expandResultWriter.AddRangeNoResize(ret.GetUnsafeReadOnlyPtr(),keys.Length);
+            keys.Dispose();
+            moves.Dispose();
         }
 
 //         private unsafe void WriteTree(NativeList<Node> nodes) {

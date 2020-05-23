@@ -23,7 +23,7 @@ namespace Hikari.AI.Jobs {
             var board = boards[ex.parentIndex].AddPieceFast(pl,pieceShapes);
             var columns = stackalloc int[10];
             var maxHeights = stackalloc byte[10];
-            GetColumns(ref board, columns, maxHeights);
+            board.GetColumns(columns, maxHeights);
 
             var holeColumn = CalcHolePos(ref maxHeights);
             var bumpiness = CalcBumpiness(ref maxHeights, holeColumn);
@@ -34,18 +34,6 @@ namespace Hikari.AI.Jobs {
             defense += 200 - 10 * CalcMaxHeight(ref board);
 
             results[index] = new int4(defense,offense,0,0);
-        }
-
-        private static void GetColumns(ref SimpleBoard board, int* columns, byte* cMaxHeights) {
-            
-            for (byte y = 0; y < 20; y++) {
-                for (byte x = 0; x < 10; x++) {
-                    if ((board.cells[y] & (1 << x)) > 0) {
-                        cMaxHeights[x] = y;
-                        columns[x] |= 1 << y;
-                    }
-                }
-            }
         }
 
         private static int CalcHolePos(ref byte* cMaxHeights) {

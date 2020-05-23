@@ -9,11 +9,11 @@ namespace Hikari.AI.Jobs {
         [ReadOnly] public NativeList<ExpandResult> expandResults;
         [ReadOnly] public NativeArray<int4> evaluations;
         [ReadOnly] public NativeArray<int4x4> pieceShapes;
-        [WriteOnly] public NativeMultiHashMap<int, NodeWithPiece>.ParallelWriter map;
+        [WriteOnly] public NativeMultiHashMap<int, Node>.ParallelWriter map;
         
         public void Execute(int index) {
             var er = expandResults[index];
-            map.Add(er.parentIndex, new NodeWithPiece(new Node(er.parentIndex, evaluations[index]),er.placement));
+            map.Add(er.parentIndex, new Node(er.parentIndex, evaluations[index],er.placement));
         }
     }
 }

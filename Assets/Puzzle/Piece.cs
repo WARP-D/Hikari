@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Hikari.Puzzle {
@@ -154,6 +155,10 @@ namespace Hikari.Puzzle {
             }
         }
 
+        public override string ToString() {
+            return $"{kind} ({x},{y}) {spin}";
+        }
+
         public static bool operator ==(Piece left, Piece right) {
             return left.Equals(right);
         }
@@ -164,6 +169,14 @@ namespace Hikari.Puzzle {
 
         public Piece WithOffset(Vector2Int offset) {
             return new Piece(kind, (sbyte) (x + offset.x), (sbyte) (y + offset.y), spin);
+        }
+
+        public Piece WithOffset(int x, int y) {
+            return WithOffset(new Vector2Int(x, y));
+        }
+
+        public Piece WithOffset(int2 v) {
+            return WithOffset(new Vector2Int(v.x, v.y));
         }
 
         public Piece WithTSpinStatus(TSpinStatus ts) {

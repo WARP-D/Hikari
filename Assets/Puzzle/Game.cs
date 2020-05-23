@@ -67,6 +67,7 @@ namespace Hikari.Puzzle {
             Ghost = Board.SonicDrop(CurrentPiece.Value);
             yTimer = 0f;
             autoLockTimer = 0f;
+            eventSubject.OnNext(new PieceSpawnedEvent(CurrentPiece.Value.kind));
             eventSubject.OnNext(new QueueUpdatedEvent(Board.nextPieces.Last()));
             IsHoldLocked = false;
         }
@@ -265,6 +266,14 @@ namespace Hikari.Puzzle {
         public class QueueUpdatedEvent : IGameEvent {
             public PieceKind kind;
             public QueueUpdatedEvent(PieceKind kind) {
+                this.kind = kind;
+            }
+        }
+        
+        public class PieceSpawnedEvent : IGameEvent {
+            public PieceKind kind;
+
+            public PieceSpawnedEvent(PieceKind kind) {
                 this.kind = kind;
             }
         }

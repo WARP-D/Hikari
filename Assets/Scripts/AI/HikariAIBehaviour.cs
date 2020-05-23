@@ -21,6 +21,9 @@ namespace Hikari.AI {
             game.EventStream.OfType<Game.IGameEvent, Game.QueueUpdatedEvent>().Subscribe(e => {
                 ai.AddNextPiece(e.kind);
             }).AddTo(this);
+            game.EventStream.OfType<Game.IGameEvent, Game.PieceSpawnedEvent>().Subscribe(e => {
+                ai.GetNextMove();
+            }).AddTo(this);
         }
 
         private void Update() {

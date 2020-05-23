@@ -121,7 +121,7 @@ namespace Hikari.AI {
         }
 
         public bool Occupied(int2 at) {
-            if (at.x < 0 || 10 <= at.x || at.y < 0) throw new ArgumentOutOfRangeException();
+            if (at.x < 0 || 10 <= at.x || at.y < 0) return true;
             var line = cells[at.y];
             return (line & (1 << at.x)) > 0;
         }
@@ -209,6 +209,18 @@ namespace Hikari.AI {
             }
             
             return newBoard;
+        }
+
+        public void GetColumns(int* columns, byte* cMaxHeights) {
+            
+            for (byte y = 0; y < 20; y++) {
+                for (byte x = 0; x < 10; x++) {
+                    if ((cells[y] & (1 << x)) > 0) {
+                        cMaxHeights[x] = y;
+                        columns[x] |= 1 << y;
+                    }
+                }
+            }
         }
 
         public TSpinStatus CheckTSpin(Piece piece, int rotation) {

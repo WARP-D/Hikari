@@ -1,9 +1,11 @@
+using Hikari.Puzzle;
 using Unity.Mathematics;
 
 namespace Hikari.AI {
     public struct Node {
         public bool valid;
-        
+
+        public Piece piece;
         public bool holdUsed;
         public int parent;
         public ChildrenRef children;
@@ -19,9 +21,10 @@ namespace Hikari.AI {
             evalSum = default;
             holdUsed = false;
             visits = 1;
+            piece = default;
         }
 
-        public Node(int parent, int4 evaluation) {
+        public Node(int parent, int4 evaluation, Piece piece) {
             valid = true;
             this.parent = parent;
             children = default;
@@ -29,6 +32,7 @@ namespace Hikari.AI {
             evalSum = default;
             holdUsed = false;
             visits = 1;
+            this.piece = piece;
         }
     }
 }

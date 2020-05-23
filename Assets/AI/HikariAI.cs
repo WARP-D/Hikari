@@ -32,7 +32,7 @@ namespace Hikari.AI {
         private NativeList<ExpandResult> expandedList;
         private NativeArray<PieceKind> nextPiecesArray;
         private NativeArray<int4> evaluations;
-        private NativeMultiHashMap<int, NodeWithPiece> expandedMap;
+        private NativeMultiHashMap<int, Node> expandedMap;
 
         private NativeArray<int4x4> pieceShapes;
 
@@ -46,10 +46,12 @@ namespace Hikari.AI {
         private Move? lastMove;
 
         public int length;
+        public int maxDepth;
 
         public bool useHold = false;
 
         public int ParallelCount { get; set; } = 7*50;
+        public int MinDepth { get; set; } = 2;
 
         public void Start() {
             tree = new NativeList<Node>(1_000_000, Allocator.Persistent) {
@@ -79,12 +81,14 @@ namespace Hikari.AI {
                 
                 jobHandle.Complete();
                 if (requestNextMove) {
-                    //todo
+                    CreateNextMove();
                 }
                 
                 // Debug.Log(selectJob.retryCounts.Sum());
                 // Debug.Log(tree.AsArray().Select(n => n.eval.Sum()).Min());
+                // Debug.Log(selectJob.depths.Max());
                 length = tree.Length;
+                maxDepth = math.max(maxDepth, selectJob.depths.Max());
                 DisposeJobs();
                 scheduled = false;
                 
@@ -102,6 +106,22 @@ namespace Hikari.AI {
             nextPiecesArray = nextPieces.ToArray(Allocator.TempJob);
 
             PrepareAndScheduleJobs();
+        }
+
+        private void CreateNextMove() {
+            var rootChildrenRef = tree[root].children;
+            if (rootChildrenRef.length == 0) return;
+            var rootChildren = new NativeSlice<Node>(tree,rootChildrenRef.start, rootChildrenRef.length);
+            foreach (var node in rootChildren.Select((n,i) => new IndexedNode(rootChildrenRef.start + i,n)).OrderByDescending(n => n.node.visits)) {
+                var b = boards[node.node.parent];
+                var move = PathFinder.FindPath(ref b, node.node.piece, pieceShapes);
+                if (move != null) {
+                    lastMove = move.Value;
+                    requestNextMove = false;
+                    Debug.Log($"Move picked: {move.Value.piece.ToString()} / {length} Nodes / {maxDepth} Depth");
+                    return;
+                }
+            }
         }
 
         private void PrepareAndScheduleJobs() {
@@ -155,7 +175,7 @@ namespace Hikari.AI {
             };
             jobHandle = evaluateJob.Schedule(expandedList, 1, jobHandle);
 
-            expandedMap = new NativeMultiHashMap<int, NodeWithPiece>(parallelCount * 300, Allocator.TempJob);
+            expandedMap = new NativeMultiHashMap<int, Node>(parallelCount * 300, Allocator.TempJob);
             reorderChildrenJob = new ReorderChildrenJob {
                 expandResults = expandedList,
                 evaluations = evaluations,

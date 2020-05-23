@@ -6,7 +6,7 @@ using Unity.Mathematics;
 namespace Hikari.AI.Jobs {
     [BurstCompile]
     public struct TreeWriteJob : IJob {
-        [ReadOnly] public NativeMultiHashMap<int, NodeWithPiece> map;
+        [ReadOnly] public NativeMultiHashMap<int, Node> map;
         [ReadOnly] public NativeArray<int4x4> pieceShapes;
         public NativeList<Node> tree;
         public NativeList<SimpleBoard> boards;
@@ -21,8 +21,8 @@ namespace Hikari.AI.Jobs {
                 var values = map.GetValuesForKey(keys[i]);
                 var c = 0;
                 while (values.MoveNext()) {
-                    tree.Add(values.Current.node);
-                    boards.Add(boards[values.Current.node.parent].AddPieceFast(values.Current.piece, pieceShapes));
+                    tree.Add(values.Current);
+                    boards.Add(boards[values.Current.parent].AddPieceFast(values.Current.piece, pieceShapes));
                     c++;
                 }
 
