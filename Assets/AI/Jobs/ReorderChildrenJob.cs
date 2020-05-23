@@ -8,7 +8,6 @@ namespace Hikari.AI.Jobs {
     public struct ReorderChildrenJob : IJobParallelForDefer {
         [ReadOnly] public NativeList<ExpandResult> expandResults;
         [ReadOnly] public NativeArray<int4> evaluations;
-        [ReadOnly] public NativeArray<int4x4> pieceShapes;
         [WriteOnly] public NativeMultiHashMap<int, Node>.ParallelWriter map;
         
         public void Execute(int index) {

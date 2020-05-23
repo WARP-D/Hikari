@@ -56,7 +56,7 @@ namespace Hikari.AI {
         public bool useHold = false;
         private bool isAdvancingTree;
 
-        public int ParallelCount { get; set; } = 1;
+        public int ParallelCount { get; set; } = 7*30;
         public int MinDepth { get; set; } = 2;
 
         public void Start() {
@@ -220,7 +220,6 @@ namespace Hikari.AI {
             reorderChildrenJob = new ReorderChildrenJob {
                 expandResults = expandedList,
                 evaluations = evaluations,
-                pieceShapes = pieceShapes,
                 map = expandedMap.AsParallelWriter()
             };
             jobHandle = reorderChildrenJob.Schedule(expandedList, 4, jobHandle);
