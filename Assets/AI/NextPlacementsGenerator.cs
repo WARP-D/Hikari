@@ -24,18 +24,21 @@ namespace Hikari.AI {
                 if (maxHeights[i] > maxHeight) maxHeight = maxHeights[i];
             }
 
-            if (maxHeight > 16) {
+            if (maxHeight < 16) {
                 var maxI = GetMaxStartsIndex(spawned.kind);
                 for (var i = 0; i < maxI; i++) {
                     var start = GetStarts(spawned.kind, i);
-                    var m = start.ToMove();
+                    var m1 = start.ToMove();
                     start.Dispose();
                     var originY = start.piece.y;
                     var piece = board.SonicDropFast(start.piece,pieceShapes);
+                    m1.piece = piece;
+                    CheckAndAddLookup(ref board, ref lookup, m1,pieceShapes);
+                    var m2 = m1;
                     var dY = originY - piece.y;
-                    m.instructions[m.length++] = (byte) SonicDrop;
-                    m.time = dY * 2;
-                    checkQueue.Add(m);
+                    m2.instructions[m2.length++] = (byte) SonicDrop;
+                    m2.time += dY * 2;
+                    checkQueue.Add(m2);
                 }
             } else {
                 var p = new Piece(spawned.kind);
@@ -78,13 +81,17 @@ namespace Hikari.AI {
                 
                 //Finally add this placement(harddropped) to return array
                 var pl = board.SonicDropFast(mv.piece,pieceShapes);
-                if (!IsAboveStacking(pl, 20)) {
-                    lookup.TryAdd(pl, mv);
-                }
+                CheckAndAddLookup(ref board, ref lookup, mv,pieceShapes);
                 
             }
 
             return lookup;
+        }
+
+        private static void CheckAndAddLookup(ref SimpleBoard board, ref NativeHashMap<Piece, Move> lookup, Move mv, NativeArray<int4x4> pieceShapes) {
+            if (!IsAboveStacking(mv.piece, 20) && !board.CollidesFast(mv.piece,pieceShapes)) {
+                lookup.TryAdd(mv.piece, mv);
+            }
         }
 
         private static void Attempt(ref SimpleBoard board, Move move,ref NativeHashMap<Piece,bool> founds,
@@ -258,7 +265,7 @@ namespace Hikari.AI {
                     case 4: return new Starting(p, 5,0,new NativeList<Instruction>(a) {Right,Right}, 3);
                     case 5: return new Starting(p, 0,0,new NativeList<Instruction>(a) {Left,Left,Left}, 5);
                     case 6: return new Starting(p, 6,0,new NativeList<Instruction>(a) {Right,Right,Right}, 5);
-                    case 7: return new Starting(p, 7,1,new NativeList<Instruction>(a) {Right,Right,Right,Right}, 7);
+                    case 7: return new Starting(p, 7,0,new NativeList<Instruction>(a) {Right,Right,Right,Right}, 7);
                     
                     case 8: return new Starting(p, 3,1,new NativeList<Instruction>(a) {Cw}, 1);
                     case 9: return new Starting(p, 2,1,new NativeList<Instruction>(a) {Left, Cw}, 2);
@@ -267,8 +274,8 @@ namespace Hikari.AI {
                     case 12: return new Starting(p, 5,1,new NativeList<Instruction>(a) {Right, Cw,Right}, 3);
                     case 13: return new Starting(p, 0,1,new NativeList<Instruction>(a) {Left, Cw,Left,Left}, 5);
                     case 14: return new Starting(p, 6,1,new NativeList<Instruction>(a) {Right, Cw,Right,Right}, 5);
-                    case 15: return new Starting(p, 7,1,new NativeList<Instruction>(a) {Right, Cw,Right,Right,Right}, 7);
-                    case 16: return new Starting(p, 7,1,new NativeList<Instruction>(a) {Left, Cw,Left,Left,Left}, 7);
+                    case 15: return new Starting(p, -1,1,new NativeList<Instruction>(a) {Left, Cw,Left,Left,Left}, 7);
+                    case 16: return new Starting(p, 7,1,new NativeList<Instruction>(a) {Right, Cw,Right,Right,Right}, 7);
                     
                     case 17: return new Starting(p, 3,3,new NativeList<Instruction>(a) {Ccw}, 1);
                     case 18: return new Starting(p, 2,3,new NativeList<Instruction>(a) {Left, Ccw}, 2);

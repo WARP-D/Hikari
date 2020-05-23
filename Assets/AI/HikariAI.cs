@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Hikari.AI.Jobs;
 using Hikari.Puzzle;
 using UniRx.Async;
@@ -50,7 +51,7 @@ namespace Hikari.AI {
 
         public bool useHold = false;
 
-        public int ParallelCount { get; set; } = 7*50;
+        public int ParallelCount { get; set; } = 7 * 40;
         public int MinDepth { get; set; } = 2;
 
         public void Start() {
@@ -118,7 +119,15 @@ namespace Hikari.AI {
                 if (move != null) {
                     lastMove = move.Value;
                     requestNextMove = false;
+                    var mv = move.Value;
                     Debug.Log($"Move picked: {move.Value.piece.ToString()} / {length} Nodes / {maxDepth} Depth");
+                    var sb = new StringBuilder();
+                    for (var i = 0; i < move.Value.length; i++) {
+                        unsafe {
+                            sb.Append((Instruction)mv.instructions[i]).Append(' ');
+                        }
+                    }
+                    Debug.Log(sb.ToString());
                     return;
                 }
             }
@@ -234,18 +243,17 @@ namespace Hikari.AI {
             if (pieceShapes.IsCreated) pieceShapes.Dispose();
         }
 
-        private void DisposeJobs() {
-            // if (treeCopy.IsCreated) treeCopy.Dispose();
-            if (rngs.IsCreated) rngs.Dispose(default);
-            if (selectJob.selected.IsCreated) selectJob.selected.Dispose(default);
-            if (selectJob.depths.IsCreated) selectJob.depths.Dispose(default);
-            if (selectJob.retryCounts.IsCreated) selectJob.retryCounts.Dispose(default);
-            if (expandedList.IsCreated) expandedList.Dispose(default);
-            if (evaluations.IsCreated) evaluations.Dispose(default);
-            if (expandedMap.IsCreated) expandedMap.Dispose(default);
-            if (nextPiecesArray.IsCreated) nextPiecesArray.Dispose(default);
+        private void DisposeJobs(JobHandle inputDeps = default, bool scheduleBatchedJobs = false) {
+            if (rngs.IsCreated) rngs.Dispose(inputDeps);
+            if (selectJob.selected.IsCreated) selectJob.selected.Dispose(inputDeps);
+            if (selectJob.depths.IsCreated) selectJob.depths.Dispose(inputDeps);
+            if (selectJob.retryCounts.IsCreated) selectJob.retryCounts.Dispose(inputDeps);
+            if (expandedList.IsCreated) expandedList.Dispose(inputDeps);
+            if (evaluations.IsCreated) evaluations.Dispose(inputDeps);
+            if (expandedMap.IsCreated) expandedMap.Dispose(inputDeps);
+            if (nextPiecesArray.IsCreated) nextPiecesArray.Dispose(inputDeps);
             
-            JobHandle.ScheduleBatchedJobs();
+            if (scheduleBatchedJobs) JobHandle.ScheduleBatchedJobs();
         }
     }
 }
