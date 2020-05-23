@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Hikari.Puzzle;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -58,7 +59,7 @@ namespace Hikari.AI {
                 }
 
                 checkQueue.Sort();
-                mv = checkQueue[0];
+                mv = checkQueue[checkQueue.Length-1];
                 checkQueue.RemoveAtSwapBack(0);
                 return true;
             }
@@ -81,7 +82,9 @@ namespace Hikari.AI {
                 
                 //Finally add this placement(harddropped) to return array
                 var pl = board.SonicDropFast(mv.piece,pieceShapes);
-                CheckAndAddLookup(ref board, ref lookup, mv,pieceShapes);
+                var mHard = mv;
+                mHard.piece = pl;
+                CheckAndAddLookup(ref board, ref lookup, mHard,pieceShapes);
                 
             }
 
@@ -125,7 +128,7 @@ namespace Hikari.AI {
                 // We should do further checks
                 if (founds.TryAdd(result, true) && !move.IsFull) {
                     var dropped = board.SonicDropFast(piece, pieceShapes);
-                    if (piece.y == dropped.y) move.Append(SonicDrop, 0, dropped);
+                    if (piece.y != dropped.y) move.Append(SonicDrop, 0, dropped);
                     checkQueue.Add(move);
                 }
             }
