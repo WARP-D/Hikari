@@ -216,11 +216,14 @@ namespace Hikari.AI {
             nextPiecesToAdd.Enqueue(pieceKind);
         }
 
-        public async UniTask<Move?> GetNextMove(PlayerLoopTiming timing = PlayerLoopTiming.Update) {
+        public void RequestNextMove() {
             if (requestNextMove) Debug.LogWarning("Next move is already requested but you requested it again.");
             requestNextMove = true;
-            await UniTask.WaitUntil(() => !requestNextMove, timing);
-            return lastMove;
+        }
+
+        public bool PollNextMove(out Move? move) {
+            move = lastMove;
+            return !requestNextMove;
         }
 
         public void GarbageReceived(IEnumerable<ushort> garbageLines) {

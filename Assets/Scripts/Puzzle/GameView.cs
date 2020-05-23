@@ -47,8 +47,8 @@ namespace Hikari.Puzzle {
             canvas = attackSummary.transform.parent;
             damageBar.Amount = 0;
             playerNameText.text = game.Player.Name;
-            var controller = GetComponent<InputController>();
-            if (controller) game.Controller = controller;
+            var controller = GetComponent<IController>();
+            if (controller != null) game.Controller = controller;
             game.EventStream
                 .OfType<Game.IGameEvent, Game.QueueUpdatedEvent>()
                 .Subscribe(e => {

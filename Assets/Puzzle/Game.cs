@@ -246,6 +246,13 @@ namespace Hikari.Puzzle {
             eventSubject.OnNext(new GarbageLinesAddedEvent(array));
         }
 
+        public bool IsCurrentPieceGrounded {
+            get {
+                if (!CurrentPiece.HasValue || !Ghost.HasValue) return false;
+                return CurrentPiece.Value == Ghost.Value;
+            }
+        }
+
         public static uint[] RenAttacks { get; } = {
             0, 0,       // 0, 1 combo
             1, 1,       // 2, 3 combo

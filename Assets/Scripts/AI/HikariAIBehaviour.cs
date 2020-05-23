@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Hikari.Puzzle;
 using TMPro;
 using UniRx;
@@ -8,8 +10,14 @@ namespace Hikari.AI {
         private HikariAI ai;
         private Game game;
 
+        private bool nextMoveRequested;
+        private Queue<Instruction> instructions = new Queue<Instruction>();
+        private bool manipulating;
+        private bool waitingForSonicDrop;
+        private int hypertap;
+
         [SerializeField] private TMP_Text length;
-        
+
         private void Awake() {
             ai = new HikariAI();
         }
@@ -21,14 +29,25 @@ namespace Hikari.AI {
             game.EventStream.OfType<Game.IGameEvent, Game.QueueUpdatedEvent>().Subscribe(e => {
                 ai.AddNextPiece(e.kind);
             }).AddTo(this);
-            game.EventStream.OfType<Game.IGameEvent, Game.PieceSpawnedEvent>().Subscribe(e => {
-                ai.GetNextMove();
+            game.EventStream.OfType<Game.IGameEvent, Game.PieceSpawnedEvent>().Subscribe(async e => {
+                ai.RequestNextMove();
+                nextMoveRequested = true;
             }).AddTo(this);
         }
 
         private void Update() {
             ai.Update();
             length.text = ai.length.ToString();
+            if (nextMoveRequested) {
+                if (ai.PollNextMove(out var move)) {
+                    nextMoveRequested = false;
+                    manipulating = true;
+                    instructions.Clear();
+                    if (move.HasValue) for (var i = 0; i < move.Value.length; i++) {
+                        instructions.Enqueue(move.Value.GetInstruction(i));
+                    }
+                }
+            }
         }
 
         private void OnDestroy() {
@@ -36,7 +55,50 @@ namespace Hikari.AI {
         }
 
         public Command RequestControlUpdate() {
-            return 0; //TODO
+            if (!manipulating) return 0;
+            
+            if (waitingForSonicDrop) {
+                if (game.IsCurrentPieceGrounded) waitingForSonicDrop = false;
+            }
+            
+            if (hypertap++ % 2 != 0) {
+                if (waitingForSonicDrop) return Command.SoftDrop;
+                return 0;
+            }
+
+            Command cmd = 0;
+
+            if (waitingForSonicDrop) {
+                cmd |= Command.SoftDrop;
+            } else {
+                if (instructions.Any()) {
+                    switch (instructions.Dequeue()) {
+                        case Instruction.Left:
+                            cmd |= Command.Left;
+                            break;
+                        case Instruction.Right:
+                            cmd |= Command.Right;
+                            break;
+                        case Instruction.Cw:
+                            cmd |= Command.RotateRight;
+                            break;
+                        case Instruction.Ccw:
+                            cmd |= Command.RotateLeft;
+                            break;
+                        case Instruction.SonicDrop:
+                            waitingForSonicDrop = true;
+                            cmd |= Command.SoftDrop;
+                            break;
+                    }
+                } else {
+                    cmd |= Command.HardDrop;
+                    hypertap = 0;
+                    waitingForSonicDrop = false;
+                    manipulating = false;
+                }
+            }
+
+            return cmd;
         }
     }
 }

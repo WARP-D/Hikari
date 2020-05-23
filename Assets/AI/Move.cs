@@ -25,5 +25,10 @@ namespace Hikari.AI {
             if (timeComparison != 0) return timeComparison;
             return length.CompareTo(other.length);
         }
+
+        public Instruction GetInstruction(int i) {
+            if (i < 0 || i >= length) throw new ArgumentOutOfRangeException();
+            return (Instruction) instructions[i];
+        }
     }
 }
