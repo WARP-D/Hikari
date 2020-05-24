@@ -20,7 +20,7 @@ namespace Hikari.AI {
             new int2x4(new int2(-2,0),new int2(1,0),new int2(-2,-1),new int2(1,2)), //01
             new int2x4(new int2(2,0),new int2(-1,0),new int2(2,1),new int2(-1,-2)), //10
             new int2x4(new int2(-1,0),new int2(2,0),new int2(-1,2),new int2(2,-1)), //12
-            new int2x4(new int2(1,0),new int2(2,0),new int2(1,-2),new int2(-2,1)), //21
+            new int2x4(new int2(1,0),new int2(-2,0),new int2(1,-2),new int2(-2,1)), //21
             new int2x4(new int2(2,0),new int2(-1,0),new int2(2,1),new int2(-1,-2)), //23
             new int2x4(new int2(-2,0),new int2(1,0),new int2(-2,-1),new int2(1,2)), //32
             new int2x4(new int2(1,0),new int2(-2,0),new int2(1,-2),new int2(-2,1)), //30
