@@ -54,7 +54,7 @@ namespace Hikari.Puzzle {
 
             for (var i = 0; i < rotationRule[rotationKey].Length; i++) {
                 var candidate = rotationRule[rotationKey][i];
-                var movedPiece = piece.WithOffset(candidate);
+                var movedPiece = piece.WithSpin((sbyte) spin).WithOffset(candidate);
                 if (board.Collides(movedPiece)) continue;
 
                 result = (i,movedPiece);
