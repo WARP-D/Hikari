@@ -38,7 +38,7 @@ namespace Hikari.Puzzle {
             EventStream = eventSubject.AsObservable();
             this.match = match;
             Player = player;
-            Board = new Board(5);
+            Board = new Board(12);
             CurrentPiece = null;
 
             this.match.EventStream.OfType<Match.IMatchEvent, Match.CountdownEvent>()

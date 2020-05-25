@@ -16,7 +16,7 @@ namespace Hikari.AI {
             board.GetColumns(columns,maxHeights);
             
             var lookup = new NativeHashMap<Piece,Move>(200,Allocator.Temp);
-            var founds = new NativeHashMap<Piece,bool>(200,Allocator.Temp);
+            var passed = new NativeHashMap<Piece,bool>(200,Allocator.Temp);
             var checkQueue = new NativeList<Move>(100,Allocator.Temp);
 
             
@@ -27,7 +27,7 @@ namespace Hikari.AI {
 
             if (maxHeight < 16) {
                 var maxI = GetMaxStartsIndex(spawned.kind);
-                for (var i = 0; i < maxI; i++) {
+                for (var i = 0; i <= maxI; i++) {
                     var start = GetStarts(spawned.kind, i);
                     var m1 = start.ToMove();
                     start.Dispose();
@@ -60,24 +60,24 @@ namespace Hikari.AI {
 
                 checkQueue.Sort();
                 mv = checkQueue[checkQueue.Length-1];
-                checkQueue.RemoveAtSwapBack(0);
+                checkQueue.RemoveAtSwapBack(checkQueue.Length-1);
                 return true;
             }
 
             while (Next(out var mv)) {
                 if (!mv.IsFull) {
-                    Attempt(ref board, mv, ref founds, ref checkQueue, Left, maxHeight, pieceShapes);
-                    Attempt(ref board, mv, ref founds, ref checkQueue, Right, maxHeight, pieceShapes);
+                    Attempt(ref board, mv, ref passed, ref checkQueue, Left, maxHeight, pieceShapes);
+                    Attempt(ref board, mv, ref passed, ref checkQueue, Right, maxHeight, pieceShapes);
 
                     if (mv.piece.kind != O) {
-                        Attempt(ref board, mv, ref founds, ref checkQueue, Cw, maxHeight, pieceShapes);
-                        Attempt(ref board, mv, ref founds, ref checkQueue, Ccw, maxHeight, pieceShapes);
+                        Attempt(ref board, mv, ref passed, ref checkQueue, Cw, maxHeight, pieceShapes);
+                        Attempt(ref board, mv, ref passed, ref checkQueue, Ccw, maxHeight, pieceShapes);
                     }
                     
-                    Attempt(ref board, mv, ref founds, ref checkQueue, Left, maxHeight, pieceShapes, true);
-                    Attempt(ref board, mv, ref founds, ref checkQueue, Right, maxHeight, pieceShapes, true);
+                    Attempt(ref board, mv, ref passed, ref checkQueue, Left, maxHeight, pieceShapes, true);
+                    Attempt(ref board, mv, ref passed, ref checkQueue, Right, maxHeight, pieceShapes, true);
                     
-                    Attempt(ref board, mv, ref founds, ref checkQueue, SonicDrop, maxHeight, pieceShapes);
+                    Attempt(ref board, mv, ref passed, ref checkQueue, SonicDrop, maxHeight, pieceShapes);
                 }
                 
                 //Finally add this placement(harddropped) to return array
@@ -97,7 +97,7 @@ namespace Hikari.AI {
             }
         }
 
-        private static void Attempt(ref SimpleBoard board, Move move,ref NativeHashMap<Piece,bool> founds,
+        private static void Attempt(ref SimpleBoard board, Move move,ref NativeHashMap<Piece,bool> alreadyPassed,
             ref NativeList<Move> checkQueue, Instruction instruction, int maxBoardHeight, NativeArray<int4x4> pieceShapes, bool repeat = false) {
             if (repeat && !(instruction == Left || instruction == Right)) throw new ArgumentException();
             
@@ -113,7 +113,7 @@ namespace Hikari.AI {
                 t = 1;
             }
 
-            if (move.length != 0 && move.instructions[move.length - 1] == (byte) instruction) {
+            if (move.length != 0 && move.GetInstructionAt(move.length - 1) == instruction) {
                 t += 1;
             }
 
@@ -126,9 +126,9 @@ namespace Hikari.AI {
 
             if (result.tSpin != TSpinStatus.None || !IsAboveStacking(result,maxBoardHeight)) {
                 // We should do further checks
-                if (founds.TryAdd(result, true) && !move.IsFull) {
+                if (alreadyPassed.TryAdd(result, true) && !move.IsFull) {
                     var dropped = board.SonicDropFast(piece, pieceShapes);
-                    if (piece.y != dropped.y) move.Append(SonicDrop, 0, dropped);
+                    if (piece.y != dropped.y) move.Append(SonicDrop, (piece.y - dropped.y) * 2, dropped);
                     checkQueue.Add(move);
                 }
             }
@@ -153,7 +153,7 @@ namespace Hikari.AI {
                 case SonicDrop:
                     var originY = piece.y;
                     result = board.SonicDropFast(piece, pieceShapes);
-                    return originY == result.y;
+                    return originY != result.y;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(inst), inst, null);
             }
@@ -161,9 +161,9 @@ namespace Hikari.AI {
 
         private static bool IsAboveStacking(Piece piece, int maxHeight) {
             if (piece.kind == I) {
-                if (piece.spin == 0) return piece.y > maxHeight - 1;
-                if (piece.spin == 2) return piece.y > maxHeight - 2;
-            } else if (piece.kind == O || piece.spin == 2) {
+                if (piece.spin == 0) return piece.y > maxHeight - 2;
+                if (piece.spin == 2) return piece.y > maxHeight - 1;
+            } else if (piece.kind == O || piece.spin == 0) {
                 return piece.y > maxHeight - 1;
             }
 

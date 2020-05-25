@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using Hikari.AI.Jobs;
 using Hikari.Puzzle;
-using UniRx.Async;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using Unity.Jobs.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 using Random = Unity.Mathematics.Random;
@@ -56,10 +56,11 @@ namespace Hikari.AI {
         public bool useHold = false;
         private bool isAdvancingTree;
 
-        public int ParallelCount { get; set; } = 7*30;
+        public int ParallelCount { get; set; } = 7*50;
         public int MinDepth { get; set; } = 2;
 
         public void Start() {
+            JobsUtility.JobWorkerCount = 7;
             tree = new NativeList<Node>(1_000_000, Allocator.Persistent) {
                 new Node(-1)
             };

@@ -8,9 +8,9 @@ namespace Hikari.AI {
         public readonly uint ren;
         public readonly uint attack;
 
-        public SimpleLockResult(PlacementKind placementKind, bool b2B, bool perfectClear, uint ren, uint attack) {
+        public SimpleLockResult(PlacementKind placementKind, bool perfectClear, uint ren, uint attack) {
             this.placementKind = placementKind;
-            b2b = b2B;
+            b2b = placementKind.IsContinuous();
             this.perfectClear = perfectClear;
             this.ren = ren;
             this.attack = attack;

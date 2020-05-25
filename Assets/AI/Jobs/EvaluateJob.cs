@@ -1,3 +1,4 @@
+using Hikari.Puzzle;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -17,8 +18,10 @@ namespace Hikari.AI.Jobs {
             var pl = ex.placement;
             var w = weight[0];
 
-            var defense = 0;
-            var offense = 0;
+            var safety = 0;
+            var attack = 0;
+            var spike = 0;
+            var possibility = 0;
 
             var board = boards[ex.parentIndex].AddPieceFast(pl,pieceShapes);
             var columns = stackalloc int[10];
@@ -28,12 +31,12 @@ namespace Hikari.AI.Jobs {
             var holeColumn = CalcHolePos(ref maxHeights);
             var bumpiness = CalcBumpiness(ref maxHeights, holeColumn);
             
-            defense += (int)(bumpiness.x * w.bumpSum);
-            defense += (int) (math.pow(bumpiness.y, 1.3f) * w.bumpMax);
+            safety += (int)(bumpiness.x * w.bumpSum);
+            safety += (int) (math.pow(bumpiness.y, 1.3f) * w.bumpMax);
 
-            defense += 200 - 10 * CalcMaxHeight(ref board);
+            safety += 200 - 10 * CalcMaxHeight(ref board);
 
-            results[index] = new int4(defense,offense,0,0);
+            results[index] = new int4(safety,attack,spike,possibility);
         }
 
         private static int CalcHolePos(ref byte* cMaxHeights) {
@@ -70,19 +73,5 @@ namespace Hikari.AI.Jobs {
 
             return max;
         }
-
-        // private static int2 FindTSpinHole(ref NativeArray<ushort> grid) {
-        //     var shape = new int3(0b101,0b000,0b001);
-        //     for (var y = 0; y < grid.Length-2; y++) {
-        //         for (var x = 0; x < 7; x++) {
-        //             var s = shape << x;
-        //             if ((grid[y] & shape.x) == 0 ||
-        //                 (grid[y + 1] & shape.y) == 0 ||
-        //                 (grid[y + 2] & shape.z) == 0) {
-        //                 
-        //             }
-        //         }
-        //     }
-        // }
     }
 }

@@ -29,7 +29,7 @@ namespace Hikari.Puzzle {
         }
 
         private Piece(PieceKind pieceKind, sbyte x, sbyte y, sbyte spin, TSpinStatus spinStatus)
-            : this(pieceKind,x,y,spin) {
+            : this(pieceKind, x, y, spin) {
             tSpin = spinStatus;
         }
 
@@ -180,7 +180,11 @@ namespace Hikari.Puzzle {
         }
 
         public Piece WithTSpinStatus(TSpinStatus ts) {
-            return new Piece(kind, x, y, spin,ts);
+            return new Piece(kind, x, y, spin, ts);
+        }
+
+        public Piece WithSpin(sbyte s) {
+            return new Piece(kind, x, y, s);
         }
     }
 }

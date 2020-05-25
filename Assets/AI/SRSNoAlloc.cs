@@ -37,7 +37,7 @@ namespace Hikari.AI {
             var rotatedDirection = GetRotatedDirection(piece.spin, cw);
             
             var newPiece = new Piece(piece.kind, piece.x,piece.y,(sbyte) rotatedDirection);
-            if (board.CollidesFast(newPiece, pieceShapes)) {
+            if (!board.CollidesFast(newPiece, pieceShapes)) {
                 rotation = 0;
                 rotated = newPiece;
                 return true;
@@ -48,7 +48,7 @@ namespace Hikari.AI {
             
             for (var i = 0; i < 4; i++) {
                 newPiece = piece.WithOffset(offsetTable[i]);
-                if (board.CollidesFast(newPiece, pieceShapes)) {
+                if (!board.CollidesFast(newPiece, pieceShapes)) {
                     rotation = i + 1;
                     rotated = newPiece;
                     return true;

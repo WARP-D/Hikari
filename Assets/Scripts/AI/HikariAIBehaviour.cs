@@ -17,6 +17,7 @@ namespace Hikari.AI {
         private int hypertap;
 
         [SerializeField] private TMP_Text length;
+        [SerializeField] private FallingPieceBehaviour preview;
 
         private void Awake() {
             ai = new HikariAI();
@@ -25,6 +26,7 @@ namespace Hikari.AI {
         private void Start() {
             game = GetComponent<GameView>().game;
             ai.Start();
+            preview.gameObject.SetActive(false);
 
             game.EventStream.OfType<Game.IGameEvent, Game.QueueUpdatedEvent>().Subscribe(e => {
                 ai.AddNextPiece(e.kind);
@@ -43,8 +45,14 @@ namespace Hikari.AI {
                     nextMoveRequested = false;
                     manipulating = true;
                     instructions.Clear();
-                    if (move.HasValue) for (var i = 0; i < move.Value.length; i++) {
-                        instructions.Enqueue(move.Value.GetInstruction(i));
+                    if (move.HasValue) {
+                        preview.gameObject.SetActive(true);
+                        preview.piece = move.Value.piece;
+                        preview.MakeShapeAndColor();
+                        preview.UpdatePosition();
+                        for (var i = 0; i < move.Value.length; i++) {
+                            instructions.Enqueue(move.Value.GetInstructionAt(i));
+                        }
                     }
                 }
             }
@@ -62,8 +70,7 @@ namespace Hikari.AI {
             }
             
             if (hypertap++ % 2 != 0) {
-                if (waitingForSonicDrop) return Command.SoftDrop;
-                return 0;
+                return waitingForSonicDrop ? Command.SoftDrop : 0;
             }
 
             Command cmd = 0;
@@ -95,6 +102,7 @@ namespace Hikari.AI {
                     hypertap = 0;
                     waitingForSonicDrop = false;
                     manipulating = false;
+                    preview.gameObject.SetActive(false);
                 }
             }
 

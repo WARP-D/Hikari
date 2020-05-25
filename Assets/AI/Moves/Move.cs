@@ -26,7 +26,7 @@ namespace Hikari.AI {
             return length.CompareTo(other.length);
         }
 
-        public Instruction GetInstruction(int i) {
+        public Instruction GetInstructionAt(int i) {
             if (i < 0 || i >= length) throw new ArgumentOutOfRangeException();
             return (Instruction) instructions[i];
         }

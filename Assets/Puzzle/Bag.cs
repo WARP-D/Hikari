@@ -21,9 +21,21 @@ namespace Hikari.Puzzle {
             throw new Exception();
         }
 
+        public bool Take(PieceKind pk) {
+            if (value == 0) RestoreAll();
+            if (Contains(pk)) {
+                value -= (byte) (1 << (byte) pk);
+                count--;
+                return true;
+            }
+
+            return false;
+        }
+
         public PieceKind TakeRandomPiece() => Pieces[TakeRandom()];
 
-        // ReSharper disable once MemberCanBePrivate.Global
+        public bool Contains(PieceKind pk) => (value & (1 << (byte) pk)) > 0;
+
         public void RestoreAll() {
             value = 0b1111111;
             count = 7;
