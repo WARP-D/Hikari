@@ -56,7 +56,7 @@ namespace Hikari.AI {
         public bool useHold = false;
         private bool isAdvancingTree;
 
-        public int ParallelCount { get; set; } = 7*50;
+        public int ParallelCount { get; set; } = 7*30;
         public int MinDepth { get; set; } = 2;
 
         public void Start() {

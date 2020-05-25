@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Hikari.AI.Utils.Collection;
 using Hikari.Puzzle;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -17,7 +18,7 @@ namespace Hikari.AI {
             
             var lookup = new NativeHashMap<Piece,Move>(200,Allocator.Temp);
             var passed = new NativeHashMap<Piece,bool>(200,Allocator.Temp);
-            var checkQueue = new NativeList<Move>(100,Allocator.Temp);
+            var checkQueue = new NativePriorityQueue<Move>(false,100,Allocator.Temp);
 
             
             var maxHeight = 0;
@@ -39,7 +40,7 @@ namespace Hikari.AI {
                     var dY = originY - piece.y;
                     m2.instructions[m2.length++] = (byte) SonicDrop;
                     m2.time += dY * 2;
-                    checkQueue.Add(m2);
+                    checkQueue.Enqueue(m2);
                 }
             } else {
                 var p = new Piece(spawned.kind);
@@ -49,19 +50,17 @@ namespace Hikari.AI {
                 m.instructions[0] = (byte) SonicDrop;
                 m.length = 1;
                 m.time = 2 * (p.y - d.y);
-                checkQueue.Add(m);
+                checkQueue.Enqueue(m);
             }
 
             bool Next(out Move mv) {
-                if (checkQueue.Length == 0) {
+                if (checkQueue.TryDequeue(out var next)) {
+                    mv = next;
+                    return true;
+                } else {
                     mv = default;
                     return false;
                 }
-
-                checkQueue.Sort();
-                mv = checkQueue[checkQueue.Length-1];
-                checkQueue.RemoveAtSwapBack(checkQueue.Length-1);
-                return true;
             }
 
             while (Next(out var mv)) {
@@ -98,7 +97,7 @@ namespace Hikari.AI {
         }
 
         private static void Attempt(ref SimpleBoard board, Move move,ref NativeHashMap<Piece,bool> alreadyPassed,
-            ref NativeList<Move> checkQueue, Instruction instruction, int maxBoardHeight, NativeArray<int4x4> pieceShapes, bool repeat = false) {
+            ref NativePriorityQueue<Move> checkQueue, Instruction instruction, int maxBoardHeight, NativeArray<int4x4> pieceShapes, bool repeat = false) {
             if (repeat && !(instruction == Left || instruction == Right)) throw new ArgumentException();
             
             var piece = move.piece;
@@ -129,7 +128,7 @@ namespace Hikari.AI {
                 if (alreadyPassed.TryAdd(result, true) && !move.IsFull) {
                     var dropped = board.SonicDropFast(piece, pieceShapes);
                     if (piece.y != dropped.y) move.Append(SonicDrop, (piece.y - dropped.y) * 2, dropped);
-                    checkQueue.Add(move);
+                    checkQueue.Enqueue(move);
                 }
             }
         }

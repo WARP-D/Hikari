@@ -20,21 +20,7 @@ namespace Hikari.AI.Jobs {
             
             var board = boards[index];
             var moves = NextPlacementsGenerator.Generate(ref board, new Piece(selected[index].currentPiece), pieceShapes);
-
-            // var spins = selected[index].currentPiece == PieceKind.O ? 1 : 4;
-            //
-            // for (sbyte y = -3; y < 19; y++) {
-            //     for (sbyte x = -3; x < 9; x++) {
-            //         for (sbyte s = 0; s < spins; s++) {
-            //             var piece = new Piece(selected[index].currentPiece, x, y, s);
-            //             
-            //             if (!boards[selected[index].index].CollidesFast(piece,pieceShapes)
-            //                         && boards[selected[index].index].GroundedFast(piece,pieceShapes)) {
-            //                 temp.Add(new ExpandResult(selected[index].index,piece, false));
-            //             }
-            //         }
-            //     }
-            // }
+            
             var keys = moves.GetKeyArray(Allocator.Temp);
             var ret = new NativeArray<ExpandResult>(keys.Length, Allocator.Temp,NativeArrayOptions.UninitializedMemory);
             for (var i = 0; i < keys.Length; i++) {
@@ -46,19 +32,5 @@ namespace Hikari.AI.Jobs {
             keys.Dispose();
             moves.Dispose();
         }
-
-//         private unsafe void WriteTree(NativeList<Node> nodes) {
-//             var idx = Interlocked.Add(ref treeWriter.ListData->Length, nodes.Length) - nodes.Length;
-//
-// #if ENABLE_UNITY_COLLECTIONS_CHECKS
-//             var ptr = treeWriter.Ptr;
-//             AtomicSafetyHandle.CheckWriteAndThrow(treeSafety[0]);
-//             if (idx + nodes.Length > treeWriter.ListData->Capacity)
-//                 throw new Exception($"Length {nodes.Length} exceeds capacity Capacity {treeWriter.ListData->Capacity}");
-// #endif
-//             var size = UnsafeUtility.SizeOf<Node>();
-//             void* dst = (byte*)treeWriter.ListData->Ptr + idx * size;
-//             UnsafeUtility.MemCpy(dst, treeWriter.ListData->Ptr, nodes.Length * size);
-//         }
     }
 }
