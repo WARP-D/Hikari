@@ -17,6 +17,8 @@ namespace Hikari.AI {
         private int hypertap;
 
         [SerializeField] private TMP_Text length;
+        [SerializeField] private TMP_Text depth;
+        [SerializeField] private TMP_Text parallelCount;
         [SerializeField] private FallingPieceBehaviour preview;
 
         private void Awake() {
@@ -40,6 +42,8 @@ namespace Hikari.AI {
         private void Update() {
             ai.Update();
             length.text = ai.length.ToString();
+            depth.text = ai.maxDepth.ToString();
+            parallelCount.text = ai.ParallelCount.ToString();
             if (nextMoveRequested) {
                 if (ai.PollNextMove(out var move)) {
                     nextMoveRequested = false;
