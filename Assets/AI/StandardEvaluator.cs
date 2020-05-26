@@ -1,5 +1,3 @@
 namespace Hikari.AI {
-    public struct StandardEvaluator {
-        
-    }
+    public struct StandardEvaluator { }
 }

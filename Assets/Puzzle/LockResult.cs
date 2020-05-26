@@ -22,7 +22,7 @@ namespace Hikari.Puzzle {
                              + (b2bBonus ? 1 : 0)
                              + (ren >= Game.RenAttacks.Length ? Game.RenAttacks.Last() : Game.RenAttacks[ren]));
             this.clearedLines = clearedLines;
-            
+
             // Debug.Log($"{placementKind.ToString()} {(b2bBonus ? " B2B" : "")} Combo{ren} {(perfectClear ? " Clear!" : "")}");
         }
     }

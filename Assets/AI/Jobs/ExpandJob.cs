@@ -17,18 +17,21 @@ namespace Hikari.AI.Jobs {
         public unsafe void Execute(int index) {
             if (!selected[index].valid) return;
             if (!selected[index].node.valid) return;
-            
+
             var board = boards[index];
-            var moves = NextPlacementsGenerator.Generate(ref board, new Piece(selected[index].currentPiece), pieceShapes);
-            
+            var moves = NextPlacementsGenerator.Generate(ref board, new Piece(selected[index].currentPiece),
+                pieceShapes);
+
             var keys = moves.GetKeyArray(Allocator.Temp);
-            var ret = new NativeArray<ExpandResult>(keys.Length, Allocator.Temp,NativeArrayOptions.UninitializedMemory);
+            var ret = new NativeArray<ExpandResult>(keys.Length, Allocator.Temp,
+                NativeArrayOptions.UninitializedMemory);
             for (var i = 0; i < keys.Length; i++) {
                 if (moves.TryGetValue(keys[i], out var mv)) {
                     ret[i] = new ExpandResult(selected[index].index, mv.piece, false);
                 }
             }
-            expandResultWriter.AddRangeNoResize(ret.GetUnsafeReadOnlyPtr(),keys.Length);
+
+            expandResultWriter.AddRangeNoResize(ret.GetUnsafeReadOnlyPtr(), keys.Length);
             keys.Dispose();
             moves.Dispose();
         }

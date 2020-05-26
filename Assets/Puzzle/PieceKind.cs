@@ -3,7 +3,13 @@ using static Hikari.Puzzle.PieceKind;
 
 namespace Hikari.Puzzle {
     public enum PieceKind : byte {
-        I,O,T,J,L,S,Z
+        I,
+        O,
+        T,
+        J,
+        L,
+        S,
+        Z
     }
 
     public static class PieceKindExtensions {

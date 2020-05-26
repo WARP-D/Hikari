@@ -7,13 +7,13 @@ namespace Hikari.Puzzle {
 
         private byte TakeRandom() {
             if (value == 0) RestoreAll();
-            var n = (byte)(UnityEngine.Random.Range(0,count) & 0xf);
+            var n = (byte) (UnityEngine.Random.Range(0, count) & 0xf);
             byte a = 0;
             for (byte i = 0; i < 7; i++) {
                 if ((value & (1 << i)) <= 0) continue;
                 if (a++ != n) continue;
-                
-                value -= (byte)(1 << i);
+
+                value -= (byte) (1 << i);
                 count--;
                 return i;
             }

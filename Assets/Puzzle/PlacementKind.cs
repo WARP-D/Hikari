@@ -57,7 +57,7 @@ namespace Hikari.Puzzle {
                 case Mini:
                 case TSpin:
                     return false;
-                default: 
+                default:
                     return true;
             }
         }

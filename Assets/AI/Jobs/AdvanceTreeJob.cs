@@ -12,7 +12,7 @@ namespace Hikari.AI.Jobs {
         [WriteOnly] public NativeList<SimpleBoard> advancedBoards;
         public int root;
         public int picked;
-        
+
         public void Execute() {
             if (picked >= tree[root].children.start + tree[root].children.length || tree[root].children.start > picked)
                 throw new ArgumentOutOfRangeException();
@@ -21,7 +21,7 @@ namespace Hikari.AI.Jobs {
             rootNode.parent = -1;
             advancedTree.Add(rootNode);
             advancedBoards.Add(boards[picked]);
-            AddChildren(rootNode.children,0);
+            AddChildren(rootNode.children, 0);
         }
 
         private void AddChildren(ChildrenRef children, int movedParentIndex) {

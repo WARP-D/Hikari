@@ -18,9 +18,9 @@ namespace Hikari.Puzzle.UI {
             text.text = kind.GetFullName();
             sequence = DOTween.Sequence()
                 .Append(background.DOAnchorPos(Vector2.zero, .18f))
-                .Insert(.1f,textTr.DOAnchorPos(Vector2.zero, .15f).SetEase(Ease.OutBack))
-                .Insert(.9f,textTr.DOAnchorPos(new Vector2(0,-80), .2f))
-                .Join(background.DOAnchorPos(new Vector2(0,-80), .2f));
+                .Insert(.1f, textTr.DOAnchorPos(Vector2.zero, .15f).SetEase(Ease.OutBack))
+                .Insert(.9f, textTr.DOAnchorPos(new Vector2(0, -80), .2f))
+                .Join(background.DOAnchorPos(new Vector2(0, -80), .2f));
             sequence.Play();
         }
     }

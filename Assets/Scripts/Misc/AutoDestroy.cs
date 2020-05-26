@@ -5,7 +5,7 @@ namespace Hikari.Misc {
         [SerializeField] private float destroyDelay;
 
         private void Start() {
-            Invoke(nameof(DestroySelf),destroyDelay);
+            Invoke(nameof(DestroySelf), destroyDelay);
         }
 
         private void DestroySelf() {

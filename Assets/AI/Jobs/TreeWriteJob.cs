@@ -10,13 +10,13 @@ namespace Hikari.AI.Jobs {
         [ReadOnly] public NativeArray<int4x4> pieceShapes;
         public NativeList<Node> tree;
         public NativeList<SimpleBoard> boards;
-        
+
         public void Execute() {
             var keys = map.GetKeyArray(Allocator.Temp);
             for (var i = 0; i < keys.Length; i++) {
                 var n = tree[keys[i]];
                 if (n.children.length > 0) continue;
-                
+
                 var start = tree.Length;
                 var values = map.GetValuesForKey(keys[i]);
                 var c = 0;
@@ -26,7 +26,7 @@ namespace Hikari.AI.Jobs {
                     c++;
                 }
 
-                n.children = new ChildrenRef(start,c);
+                n.children = new ChildrenRef(start, c);
                 tree[keys[i]] = n;
             }
         }

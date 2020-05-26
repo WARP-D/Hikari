@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Hikari.Puzzle {
     public class CellBlock : MonoBehaviour {
-        public static Material[] materials = new Material[15];//I,O,T,J,L,S,Z,Gbg
+        public static Material[] materials = new Material[15]; //I,O,T,J,L,S,Z,Gbg
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void LoadCellMaterials() {

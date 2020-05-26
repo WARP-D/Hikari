@@ -9,15 +9,15 @@ namespace Hikari.AI {
         public float tHole;
         public float tstHole;
         public float finHole;
-        
-        
+
+
         public float bumpSum;
         public float bumpMax;
 
         public static Weights Default => new Weights {
-            clears = new float4(-60,-100,-20,300),
-            tSpins = new float4(100,400,500,0),
-            tMiniSpins = new float4(-100,-500,0,0),
+            clears = new float4(-60, -100, -20, 300),
+            tSpins = new float4(100, 400, 500, 0),
+            tMiniSpins = new float4(-100, -500, 0, 0),
             tHole = 200,
             tstHole = 220,
             finHole = 150,

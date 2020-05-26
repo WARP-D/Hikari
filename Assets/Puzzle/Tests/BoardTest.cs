@@ -3,13 +3,10 @@ using Hikari.Puzzle;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Tests
-{
-    public class BoardTest
-    {
+namespace Tests {
+    public class BoardTest {
         [Test]
-        public void FiveNextOrder()
-        {
+        public void FiveNextOrder() {
             var board = new Board(5);
             Debug.Log(string.Concat(board.nextPieces.Select(n => n.ToString())));
             Assert.That(board.nextPieces.Distinct().Count() == board.nextPieces.Count(), Is.True);

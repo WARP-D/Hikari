@@ -57,7 +57,7 @@ namespace Hikari.AI {
         public bool useHold = false;
         private bool isAdvancingTree;
 
-        public int ParallelCount { get; set; } = 7*30;
+        public int ParallelCount { get; set; } = 7 * 30;
         public int MinDepth { get; set; } = 2;
 
         public void Start() {
@@ -69,8 +69,10 @@ namespace Hikari.AI {
                 new SimpleBoard()
             };
             nextPieces = new NativeQueue<PieceKind>(Allocator.Persistent);
-            
-            pieceShapes = new NativeArray<int>(Piece.OneDShapes,Allocator.Persistent).Reinterpret<int4x4>(UnsafeUtility.SizeOf<int>());
+
+            pieceShapes =
+                new NativeArray<int>(Piece.OneDShapes, Allocator.Persistent).Reinterpret<int4x4>(
+                    UnsafeUtility.SizeOf<int>());
         }
 
         public void Update() {
@@ -88,19 +90,22 @@ namespace Hikari.AI {
                 maxDepth = 0;
                 length = tree.Length;
             }
+
             // Complete previous job
             if (scheduled) {
                 if (!jobHandle.IsCompleted) {
                     if (completionDelay < MaxCompletionDelay) {
                         completionDelay++;
-                        Debug.Log($"Jobs are not completed, I'll delay completion for {MaxCompletionDelay - completionDelay} more frame{(MaxCompletionDelay - completionDelay == 1 ? "" : "s")}");
+                        Debug.Log(
+                            $"Jobs are not completed, I'll delay completion for {MaxCompletionDelay - completionDelay} more frame{(MaxCompletionDelay - completionDelay == 1 ? "" : "s")}");
                         return;
                     }
 
                     Debug.LogWarning("Jobs are still not completed, but I force to complete");
                 }
+
                 completionDelay = 0;
-                
+
                 jobHandle.Complete();
                 if (requestNextMove) {
                     if (CreateNextMove(out var picked)) {
@@ -108,7 +113,7 @@ namespace Hikari.AI {
                         isAdvancingTree = true;
                     }
                 }
-                
+
                 // Debug.Log(selectJob.retryCounts.Sum());
                 // Debug.Log(tree.AsArray().Select(n => n.eval.Sum()).Min());
                 // Debug.Log(selectJob.depths.Max());
@@ -116,14 +121,13 @@ namespace Hikari.AI {
                 maxDepth = math.max(maxDepth, selectJob.depths.Max());
                 DisposeJobs();
                 scheduled = false;
-                
             }
 
             // Add pieces to queue if provided
             while (nextPiecesToAdd.Any()) {
                 nextPieces.Enqueue(nextPiecesToAdd.Dequeue());
             }
-            
+
             // Ensure that I can expand tree
             if (!nextPieces.IsCreated || nextPieces.Count <= 1) return;
 
@@ -139,8 +143,9 @@ namespace Hikari.AI {
                 return false;
             }
 
-            var rootChildren = new NativeSlice<Node>(tree,rootChildrenRef.start, rootChildrenRef.length);
-            foreach (var node in rootChildren.Select((n,i) => new IndexedNode(rootChildrenRef.start + i,n)).OrderByDescending(n => n.node.visits)) {
+            var rootChildren = new NativeSlice<Node>(tree, rootChildrenRef.start, rootChildrenRef.length);
+            foreach (var node in rootChildren.Select((n, i) => new IndexedNode(rootChildrenRef.start + i, n))
+                .OrderByDescending(n => n.node.visits)) {
                 var b = boards[node.node.parent];
                 var move = PathFinder.FindPath(ref b, node.node.piece, pieceShapes);
                 if (move == null) continue;
@@ -151,9 +156,10 @@ namespace Hikari.AI {
                 var sb = new StringBuilder();
                 for (var i = 0; i < move.Value.length; i++) {
                     unsafe {
-                        sb.Append((Instruction)mv.instructions[i]).Append(' ');
+                        sb.Append((Instruction) mv.instructions[i]).Append(' ');
                     }
                 }
+
                 Debug.Log(sb.ToString());
                 picked = node.index;
                 return true;
@@ -165,7 +171,7 @@ namespace Hikari.AI {
 
         private void PrepareAndScheduleJobs() {
             var parallelCount = math.min(ParallelCount, tree.Length); //todo is this the right way?
-            
+
             // Prepare queue & tree
             nextPiecesArray = nextPieces.ToArray(Allocator.TempJob);
 
@@ -245,11 +251,10 @@ namespace Hikari.AI {
         }
 
         private JobHandle AdvanceTree(int picked) {
-            if (maxDepth < MinDepth) throw new Exception();
-            
-            advancedTree = new NativeList<Node>(1_000_000,Allocator.Persistent);
+
+            advancedTree = new NativeList<Node>(1_000_000, Allocator.Persistent);
             advancedBoards = new NativeList<SimpleBoard>(1_000_000, Allocator.Persistent);
-            
+
             advanceTreeJob = new AdvanceTreeJob {
                 tree = tree,
                 boards = boards,
@@ -287,12 +292,12 @@ namespace Hikari.AI {
 
         public void Dispose() {
             jobHandle.Complete();
-            
+
             DisposeJobs();
-            
+
             if (tree.IsCreated) tree.Dispose();
             if (boards.IsCreated) boards.Dispose();
-            
+
             if (advancedTree.IsCreated) advancedTree.Dispose();
             if (advancedBoards.IsCreated) advancedBoards.Dispose();
 
@@ -309,7 +314,7 @@ namespace Hikari.AI {
             if (evaluations.IsCreated) evaluations.Dispose(inputDeps);
             if (expandedMap.IsCreated) expandedMap.Dispose(inputDeps);
             if (nextPiecesArray.IsCreated) nextPiecesArray.Dispose(inputDeps);
-            
+
             if (scheduleBatchedJobs) JobHandle.ScheduleBatchedJobs();
         }
     }

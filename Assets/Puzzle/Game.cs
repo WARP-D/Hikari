@@ -16,10 +16,10 @@ namespace Hikari.Puzzle {
         public bool IsHoldLocked { get; private set; }
         public bool IsGrounded { get; private set; }
         public bool IsDead { get; private set; }
-        
+
         public int Ren { get; private set; }
         public bool B2B { get; private set; }
-        
+
         public IController Controller { get; set; }
 
         public float Gravity { get; } = 1f;
@@ -64,6 +64,7 @@ namespace Hikari.Puzzle {
                 Debug.Log($"Player{Player.ID} died");
                 eventSubject.OnNext(DeathEvent.Default);
             }
+
             Ghost = Board.SonicDrop(CurrentPiece.Value);
             yTimer = 0f;
             autoLockTimer = 0f;
@@ -74,27 +75,28 @@ namespace Hikari.Puzzle {
 
         public void Update() {
             if (attackDelay == 0) {
-                match.DistributeDamage(Player.ID,attackValue);
+                match.DistributeDamage(Player.ID, attackValue);
                 attackValue = 0;
                 attackDelay = -1;
             }
+
             if (attackDelay > 0) attackDelay--;
-            
+
             if (spawnDelay == 0) SpawnNewPiece();
 
             if (spawnDelay > 0) {
                 spawnDelay--;
                 return;
             }
-            
+
             if (IsDead) return;
-            
+
             if (!CurrentPiece.HasValue) return;
             var currentPiece = CurrentPiece.Value;
-            
+
             var updated = false;
             var gravityMultiplier = 1f;
-            
+
             if (Controller != null) {
                 var cmd = Controller.RequestControlUpdate();
 
@@ -109,10 +111,10 @@ namespace Hikari.Puzzle {
                         Board.holdPiece = currentPiece.kind;
                         SpawnNewPiece();
                     }
-                    
+
                     IsHoldLocked = true;
                     eventSubject.OnNext(HoldEvent.Default);
-                    
+
                     return;
                 }
 
@@ -156,7 +158,7 @@ namespace Hikari.Puzzle {
                     LockPiece();
                 }
             }
-            
+
             Ghost = Board.SonicDrop(currentPiece);
             yTimer += Gravity * Time.deltaTime * gravityMultiplier;
             var fall = false;
@@ -184,7 +186,7 @@ namespace Hikari.Puzzle {
         private void LockPiece() {
             var drop = Board.SonicDrop(CurrentPiece.Value);
             var lockResult = Board.Lock(drop);
-            eventSubject.OnNext(new PieceLockedEvent(true, drop,lockResult));
+            eventSubject.OnNext(new PieceLockedEvent(true, drop, lockResult));
             CurrentPiece = null;
             Ghost = null;
             if (lockResult.clearedLines.Any()) {
@@ -238,6 +240,7 @@ namespace Hikari.Puzzle {
                 for (var j = 0; j < line.Length; j++) {
                     line[j] = (byte) (columnPos == j ? 0 : 7);
                 }
+
                 lines.Add(line);
             }
 
@@ -254,12 +257,12 @@ namespace Hikari.Puzzle {
         }
 
         public static uint[] RenAttacks { get; } = {
-            0, 0,       // 0, 1 combo
-            1, 1,       // 2, 3 combo
-            2, 2,       // 4, 5 combo
-            3, 3,       // 6, 7 combo
-            4, 4, 4,    // 8, 9, 10 combo
-            5           // 11+ combo
+            0, 0, // 0, 1 combo
+            1, 1, // 2, 3 combo
+            2, 2, // 4, 5 combo
+            3, 3, // 6, 7 combo
+            4, 4, 4, // 8, 9, 10 combo
+            5 // 11+ combo
         };
 
         public struct PlayerInfo {
@@ -267,16 +270,17 @@ namespace Hikari.Puzzle {
             public string Name { get; set; }
             public PlayerKind Kind { get; set; }
         }
-        
+
         public interface IGameEvent { }
 
         public class QueueUpdatedEvent : IGameEvent {
             public PieceKind kind;
+
             public QueueUpdatedEvent(PieceKind kind) {
                 this.kind = kind;
             }
         }
-        
+
         public class PieceSpawnedEvent : IGameEvent {
             public PieceKind kind;
 
@@ -284,37 +288,43 @@ namespace Hikari.Puzzle {
                 this.kind = kind;
             }
         }
-        
+
         public class FallingPieceMovedEvent : IGameEvent {
             public static FallingPieceMovedEvent Default { get; } = new FallingPieceMovedEvent();
         }
+
         public class PieceLockedEvent : IGameEvent {
             public bool hardDrop;
             public Piece piece;
             public LockResult lockResult;
+
             public PieceLockedEvent(bool hardDrop, Piece piece, LockResult lockResult) {
                 this.hardDrop = hardDrop;
                 this.piece = piece;
                 this.lockResult = lockResult;
             }
         }
+
         public class HoldEvent : IGameEvent {
             public static HoldEvent Default { get; } = new HoldEvent();
         }
+
         public class GotDamageEvent : IGameEvent {
             public uint value;
+
             public GotDamageEvent(uint value) {
                 this.value = value;
             }
         }
-        
+
         public class GarbageLinesAddedEvent : IGameEvent {
             public byte[][] rows;
+
             public GarbageLinesAddedEvent(byte[][] rows) {
                 this.rows = rows;
             }
         }
-        
+
         public class DeathEvent : IGameEvent {
             public static DeathEvent Default { get; } = new DeathEvent();
         }

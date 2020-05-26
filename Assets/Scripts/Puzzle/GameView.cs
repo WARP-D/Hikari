@@ -69,7 +69,7 @@ namespace Hikari.Puzzle {
                 .OfType<Game.IGameEvent, Game.GarbageLinesAddedEvent>()
                 .Subscribe(async e => {
                     if (isInClearEffect) await UniTask.DelayFrame(40);
-                    
+
                     var move = e.rows.Length;
                     for (var i = cells.Length - 1; i >= cells.Length - e.rows.Length; i--) {
                         foreach (var cellBlock in cells[i].Where(cb => cb)) {
@@ -159,7 +159,7 @@ namespace Hikari.Puzzle {
                                 if (cells[y][x]) cells[y][x].transform.localPosition = new Vector3(x, y);
                             }
                         }
-                        
+
                         isInClearEffect = false;
                     }
                 }).AddTo(subscriptions);

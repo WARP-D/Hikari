@@ -14,7 +14,8 @@ namespace Hikari.Puzzle {
             {32, new[] {(0, 0), (-1, 0), (-1, -1), (0, 2), (-1, 2)}},
             {30, new[] {(0, 0), (-1, 0), (-1, -1), (0, 2), (-1, 2)}},
             {03, new[] {(0, 0), (1, 0), (1, 1), (0, -2), (1, -2)}}
-        }.ToDictionary(kv => kv.Key, kv => kv.Value.Select(tuple => new Vector2Int(tuple.Item1, tuple.Item2)).ToArray());
+        }.ToDictionary(kv => kv.Key,
+            kv => kv.Value.Select(tuple => new Vector2Int(tuple.Item1, tuple.Item2)).ToArray());
 
         private static readonly Dictionary<int, Vector2Int[]> RotationTableI = new Dictionary<int, (int, int)[]> {
             {01, new[] {(0, 0), (-2, 0), (1, 0), (-2, -1), (1, 2)}},
@@ -25,15 +26,15 @@ namespace Hikari.Puzzle {
             {32, new[] {(0, 0), (-2, 0), (1, 0), (-2, -1), (1, 2)}},
             {30, new[] {(0, 0), (1, 0), (-2, 0), (1, -2), (-2, 1)}},
             {03, new[] {(0, 0), (-1, 0), (2, 0), (-1, 2), (2, -1)}}
-        }.ToDictionary(kv => kv.Key, kv => kv.Value.Select(tuple => new Vector2Int(tuple.Item1, tuple.Item2)).ToArray());
+        }.ToDictionary(kv => kv.Key,
+            kv => kv.Value.Select(tuple => new Vector2Int(tuple.Item1, tuple.Item2)).ToArray());
 
         public static bool TryRotate(Piece piece, Board board, bool turnRight, out (int, Piece) result) {
-            
             Dictionary<int, Vector2Int[]> rotationRule;
-            
+
             switch (piece.kind) {
                 case PieceKind.O:
-                    result = (0,piece);
+                    result = (0, piece);
                     return true;
                 case PieceKind.I:
                     rotationRule = RotationTableI;
@@ -48,7 +49,7 @@ namespace Hikari.Puzzle {
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            
+
             var spin = GetRotatedDirection(piece.spin, turnRight);
             var rotationKey = piece.spin * 10 + spin;
 
@@ -57,11 +58,11 @@ namespace Hikari.Puzzle {
                 var movedPiece = piece.WithSpin((sbyte) spin).WithOffset(candidate);
                 if (board.Collides(movedPiece)) continue;
 
-                result = (i,movedPiece);
+                result = (i, movedPiece);
                 return true;
             }
 
-            result = (-1,default);
+            result = (-1, default);
             return false;
         }
 

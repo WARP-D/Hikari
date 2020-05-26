@@ -21,10 +21,10 @@ namespace Hikari.AI.Jobs {
         public void Execute(int i) {
             var retryCount = 0;
             var rng = rands[i];
-            
-            exec: 
-            var current = new IndexedNode(rootIndex[0],tree[rootIndex[0]]);
-            
+
+            exec:
+            var current = new IndexedNode(rootIndex[0], tree[rootIndex[0]]);
+
             var depth = 0;
             while (current.node.children.length > 0) {
                 depth++;
@@ -40,7 +40,8 @@ namespace Hikari.AI.Jobs {
                 Select(ref current, depth, ref rng);
             }
 
-            var selectResult = new SelectResult(current, boards[current.index].holdingSomething ? pieceQueue[depth + 1] : pieceQueue[depth]);
+            var selectResult = new SelectResult(current,
+                boards[current.index].holdingSomething ? pieceQueue[depth + 1] : pieceQueue[depth]);
             selected[i] = selectResult;
             depths[i] = depth;
             retryCounts[i] = retryCount;
@@ -71,14 +72,14 @@ namespace Hikari.AI.Jobs {
                 weights[j] = (weights[j] - min) / sum;
             }
 
-            var rand = rng.NextFloat(0f,1f);
+            var rand = rng.NextFloat(0f, 1f);
             var val = 0f;
 
             for (var j = 0; j < children.length; j++) {
                 val += weights[j];
                 if (val > rand) {
                     var idx = children.start + j;
-                    current = new IndexedNode(idx,tree[idx]);
+                    current = new IndexedNode(idx, tree[idx]);
                     break;
                 }
             }

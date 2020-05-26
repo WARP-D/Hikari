@@ -73,13 +73,13 @@ namespace Hikari.Puzzle {
             public int count;
             public bool stop;
         }
-        
+
         public class StartEvent : IMatchEvent { }
-        
+
         public class UpdateEvent : IMatchEvent {
             public static readonly UpdateEvent Default = new UpdateEvent();
         }
-        
+
         public class MatchFinishEvent : IMatchEvent {
             public static readonly MatchFinishEvent Default = new MatchFinishEvent();
         }

@@ -9,7 +9,7 @@ namespace Hikari.AI.Jobs {
         [ReadOnly] public NativeList<ExpandResult> expandResults;
         [ReadOnly] public NativeArray<int4> evaluations;
         public NativeArray<Node> tree;
-        
+
         public void Execute() {
             for (var i = 0; i < expandResults.Length; i++) {
                 var parent = expandResults[i].parentIndex;

@@ -11,8 +11,8 @@ namespace Hikari.AI {
                 board = board,
                 dest = placement,
                 pieceShapes = pieceShapes,
-                success = new NativeArray<bool>(1,Allocator.TempJob),
-                move = new NativeArray<Move>(1,Allocator.TempJob)
+                success = new NativeArray<bool>(1, Allocator.TempJob),
+                move = new NativeArray<Move>(1, Allocator.TempJob)
             };
             job.Run();
             var success = job.success[0];
@@ -21,7 +21,7 @@ namespace Hikari.AI {
             job.move.Dispose();
             return success ? mv : (Move?) null;
         }
-        
+
         [BurstCompile]
         private struct PathFindJob : IJob {
             public SimpleBoard board;
@@ -30,7 +30,7 @@ namespace Hikari.AI {
 
             [WriteOnly] public NativeArray<Move> move;
             [WriteOnly] public NativeArray<bool> success;
-            
+
             public void Execute() {
                 var paths = NextPlacementsGenerator.Generate(ref board, new Piece(dest.kind), pieceShapes);
                 if (paths.TryGetValue(dest, out var m)) {

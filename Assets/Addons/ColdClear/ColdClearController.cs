@@ -13,9 +13,7 @@ namespace Hikari.Addons.ColdClear {
         private void Start() {
             game = GetComponent<Game>();
             game.EventStream.OfType<Game.IGameEvent, Game.QueueUpdatedEvent>()
-                .Subscribe(e => {
-                    bot.AddNextPiece(game.Board.nextPieces.LastOrDefault());
-                })
+                .Subscribe(e => { bot.AddNextPiece(game.Board.nextPieces.LastOrDefault()); })
                 .AddTo(this);
         }
 

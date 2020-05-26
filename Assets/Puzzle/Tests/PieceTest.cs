@@ -5,67 +5,64 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Tests
-{
-    public class PieceTest
-    {
+namespace Tests {
+    public class PieceTest {
         [Test]
-        public void PieceShapeI()
-        {
+        public void PieceShapeI() {
             for (var i = 0; i < 4; i++) {
                 Debug.Log("Spin " + i);
                 GeneratePieceShape(Piece.Shapes[0][i]);
             }
         }
+
         [Test]
-        public void PieceShapeO()
-        {
+        public void PieceShapeO() {
             for (var i = 0; i < 4; i++) {
                 Debug.Log("Spin " + i);
                 GeneratePieceShape(Piece.Shapes[1][i]);
             }
         }
+
         [Test]
-        public void PieceShapeT()
-        {
+        public void PieceShapeT() {
             for (var i = 0; i < 4; i++) {
                 Debug.Log("Spin " + i);
                 GeneratePieceShape(Piece.Shapes[2][i]);
             }
         }
+
         [Test]
-        public void PieceShapeJ()
-        {
+        public void PieceShapeJ() {
             for (var i = 0; i < 4; i++) {
                 Debug.Log("Spin " + i);
                 GeneratePieceShape(Piece.Shapes[3][i]);
             }
         }
+
         [Test]
-        public void PieceShapeL()
-        {
+        public void PieceShapeL() {
             for (var i = 0; i < 4; i++) {
                 Debug.Log("Spin " + i);
                 GeneratePieceShape(Piece.Shapes[4][i]);
             }
         }
+
         [Test]
-        public void PieceShapeS()
-        {
+        public void PieceShapeS() {
             for (var i = 0; i < 4; i++) {
                 Debug.Log("Spin " + i);
                 GeneratePieceShape(Piece.Shapes[5][i]);
             }
         }
+
         [Test]
-        public void PieceShapeZ()
-        {
+        public void PieceShapeZ() {
             for (var i = 0; i < 4; i++) {
                 Debug.Log("Spin " + i);
                 GeneratePieceShape(Piece.Shapes[6][i]);
             }
         }
-        
+
 
         private void GeneratePieceShape(ushort[] shape) {
             for (var i = shape.Length - 1; i >= 0; i--) {

@@ -9,7 +9,7 @@ namespace Hikari.Puzzle {
 
         public Command RequestControlUpdate() {
             if (Input.GetKeyDown(KeyCode.C)) return Command.Hold;
-            
+
             var cmd = (Command) 0;
             if (Input.GetKey(KeyCode.LeftArrow)) {
                 if (leftPressingTime == 0 ||

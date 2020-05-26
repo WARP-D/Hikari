@@ -4,7 +4,7 @@ using Hikari.Puzzle;
 namespace Hikari.AI {
     public unsafe struct Move : IComparable<Move> {
         public const int MaxInstructions = 16;
-        
+
         public fixed byte instructions[MaxInstructions];
         public byte length;
         public Piece piece;

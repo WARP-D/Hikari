@@ -7,20 +7,20 @@ namespace Hikari.AI.Utils.Collection {
         private NativeList<T> list;
         private bool greater;
 
-        public NativePriorityQueue(bool greater,int initLength, Allocator alloc) {
-            list = new NativeList<T>(initLength,alloc);
+        public NativePriorityQueue(bool greater, int initLength, Allocator alloc) {
+            list = new NativeList<T>(initLength, alloc);
             this.greater = greater;
         }
 
-        public NativePriorityQueue(bool greater, Allocator alloc) : this(greater,0,alloc) { }
+        public NativePriorityQueue(bool greater, Allocator alloc) : this(greater, 0, alloc) { }
 
         public void Enqueue(T value) {
             list.Add(value);
             var i = list.Length - 1;
             while (i != 0) {
                 var parent = (i - 1) / 2;
-                if (Compare(list[i],list[parent]) > 0) {
-                    Swap(i,parent);
+                if (Compare(list[i], list[parent]) > 0) {
+                    Swap(i, parent);
                     i = parent;
                 } else break;
             }
@@ -31,14 +31,13 @@ namespace Hikari.AI.Utils.Collection {
             list[i1] = list[i2];
             list[i2] = tmp;
         }
-        
-        private int Compare(T a, T b)
-        {
+
+        private int Compare(T a, T b) {
             var c = a.CompareTo(b);
-            if (!greater)
-            {
+            if (!greater) {
                 c = -c;
             }
+
             return c;
         }
 

@@ -6,37 +6,38 @@ using Unity.Mathematics;
 namespace Hikari.AI {
     public static class SRSNoAlloc {
         private static readonly int2x4[] RotationTable = {
-            new int2x4(new int2(-1,0),new int2(-1,1),new int2(0,-2),new int2(-1,-2)), //01
-            new int2x4(new int2(1,0),new int2(1,-1),new int2(0,2),new int2(1,2)), //10
-            new int2x4(new int2(1,0),new int2(1,-1),new int2(0,2),new int2(1,2)), //12
-            new int2x4(new int2(-1,0),new int2(-1,1),new int2(0,-2),new int2(-1,-2)), //21
-            new int2x4(new int2(1,0),new int2(1,1),new int2(0,-2),new int2(1,-2)), //23
-            new int2x4(new int2(-1,0),new int2(-1,-1),new int2(0,2),new int2(-1,2)), //32
-            new int2x4(new int2(-1,0),new int2(-1,-1),new int2(0,2),new int2(-1,2)), //30
-            new int2x4(new int2(1,0),new int2(1,1),new int2(0,-2),new int2(1,-2)), //03
-        };
-        
-        private static readonly int2x4[] RotationTableI = {
-            new int2x4(new int2(-2,0),new int2(1,0),new int2(-2,-1),new int2(1,2)), //01
-            new int2x4(new int2(2,0),new int2(-1,0),new int2(2,1),new int2(-1,-2)), //10
-            new int2x4(new int2(-1,0),new int2(2,0),new int2(-1,2),new int2(2,-1)), //12
-            new int2x4(new int2(1,0),new int2(-2,0),new int2(1,-2),new int2(-2,1)), //21
-            new int2x4(new int2(2,0),new int2(-1,0),new int2(2,1),new int2(-1,-2)), //23
-            new int2x4(new int2(-2,0),new int2(1,0),new int2(-2,-1),new int2(1,2)), //32
-            new int2x4(new int2(1,0),new int2(-2,0),new int2(1,-2),new int2(-2,1)), //30
-            new int2x4(new int2(-1,0),new int2(2,0),new int2(-1,2),new int2(2,-1)), //03
+            new int2x4(new int2(-1, 0), new int2(-1, 1), new int2(0, -2), new int2(-1, -2)), //01
+            new int2x4(new int2(1, 0), new int2(1, -1), new int2(0, 2), new int2(1, 2)), //10
+            new int2x4(new int2(1, 0), new int2(1, -1), new int2(0, 2), new int2(1, 2)), //12
+            new int2x4(new int2(-1, 0), new int2(-1, 1), new int2(0, -2), new int2(-1, -2)), //21
+            new int2x4(new int2(1, 0), new int2(1, 1), new int2(0, -2), new int2(1, -2)), //23
+            new int2x4(new int2(-1, 0), new int2(-1, -1), new int2(0, 2), new int2(-1, 2)), //32
+            new int2x4(new int2(-1, 0), new int2(-1, -1), new int2(0, 2), new int2(-1, 2)), //30
+            new int2x4(new int2(1, 0), new int2(1, 1), new int2(0, -2), new int2(1, -2)), //03
         };
 
-        public static bool TryRotate(Piece piece, ref SimpleBoard board, bool cw, NativeArray<int4x4> pieceShapes, out int rotation, out Piece rotated) {
+        private static readonly int2x4[] RotationTableI = {
+            new int2x4(new int2(-2, 0), new int2(1, 0), new int2(-2, -1), new int2(1, 2)), //01
+            new int2x4(new int2(2, 0), new int2(-1, 0), new int2(2, 1), new int2(-1, -2)), //10
+            new int2x4(new int2(-1, 0), new int2(2, 0), new int2(-1, 2), new int2(2, -1)), //12
+            new int2x4(new int2(1, 0), new int2(-2, 0), new int2(1, -2), new int2(-2, 1)), //21
+            new int2x4(new int2(2, 0), new int2(-1, 0), new int2(2, 1), new int2(-1, -2)), //23
+            new int2x4(new int2(-2, 0), new int2(1, 0), new int2(-2, -1), new int2(1, 2)), //32
+            new int2x4(new int2(1, 0), new int2(-2, 0), new int2(1, -2), new int2(-2, 1)), //30
+            new int2x4(new int2(-1, 0), new int2(2, 0), new int2(-1, 2), new int2(2, -1)), //03
+        };
+
+        public static bool TryRotate(Piece piece, ref SimpleBoard board, bool cw, NativeArray<int4x4> pieceShapes,
+            out int rotation, out Piece rotated) {
             if (piece.kind == PieceKind.O) {
                 rotation = 0;
                 rotated = piece;
                 return true;
             }
-            
+
             var rotatedDirection = GetRotatedDirection(piece.spin, cw);
-            
-            var newPiece = new Piece(piece.kind, piece.x,piece.y,rotatedDirection);
+
+            var newPiece = new Piece(piece.kind, piece.x, piece.y, rotatedDirection);
             if (!board.CollidesFast(newPiece, pieceShapes)) {
                 rotation = 0;
                 rotated = newPiece;
@@ -44,8 +45,10 @@ namespace Hikari.AI {
             }
 
             var key = piece.spin * 10 + rotatedDirection;
-            var offsetTable = piece.kind == PieceKind.I ? RotationTableI[KeyToIndex(key)] : RotationTable[KeyToIndex(key)];
-            
+            var offsetTable = piece.kind == PieceKind.I
+                ? RotationTableI[KeyToIndex(key)]
+                : RotationTable[KeyToIndex(key)];
+
             for (var i = 0; i < 4; i++) {
                 newPiece = piece.WithOffset(offsetTable[i]).WithSpin(rotatedDirection);
                 if (!board.CollidesFast(newPiece, pieceShapes)) {
@@ -73,11 +76,10 @@ namespace Hikari.AI {
                 default: throw new ArgumentException();
             }
         }
-        
+
         private static sbyte GetRotatedDirection(int from, bool cw) {
             if (cw) return (sbyte) ((from + 1) % 4);
             else return (sbyte) (from == 0 ? 3 : from - 1);
         }
-    
     }
 }

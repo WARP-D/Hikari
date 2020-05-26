@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Hikari" pattern="file[riderModule]:Assets/AI//*||file[riderModule]:Assets/Utils/*||file[riderModule]:Assets/Utils//*||file[riderModule]:Assets/Addons//*||file[riderModule]:Assets/Puzzle//*||file[riderModule]:Assets/Scripts//*" />
+</component>

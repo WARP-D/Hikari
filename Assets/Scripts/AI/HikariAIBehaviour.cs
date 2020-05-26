@@ -68,11 +68,11 @@ namespace Hikari.AI {
 
         public Command RequestControlUpdate() {
             if (!manipulating) return 0;
-            
+
             if (waitingForSonicDrop) {
                 if (game.IsCurrentPieceGrounded) waitingForSonicDrop = false;
             }
-            
+
             if (hypertap++ % 2 != 0) {
                 return waitingForSonicDrop ? Command.SoftDrop : 0;
             }

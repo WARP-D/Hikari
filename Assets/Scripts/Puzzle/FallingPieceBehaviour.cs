@@ -12,7 +12,7 @@ namespace Hikari.Puzzle {
             for (var i = 0; i < 4; i++) {
                 for (var j = 0; j < 4; j++) {
                     if ((shape[i] & (1 << j)) > 0) {
-                        cells[c].transform.localPosition = new Vector3(j,i);
+                        cells[c].transform.localPosition = new Vector3(j, i);
                         cells[c].materialIndex = (int) piece.kind + (transparent ? 8 : 0);
                         cells[c].UpdateMaterial();
                         c++;
@@ -22,7 +22,7 @@ namespace Hikari.Puzzle {
         }
 
         public void UpdatePosition() {
-            transform.localPosition = new Vector3(piece.x,piece.y);
+            transform.localPosition = new Vector3(piece.x, piece.y);
         }
     }
 }
