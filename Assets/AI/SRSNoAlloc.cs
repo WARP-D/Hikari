@@ -36,7 +36,7 @@ namespace Hikari.AI {
             
             var rotatedDirection = GetRotatedDirection(piece.spin, cw);
             
-            var newPiece = new Piece(piece.kind, piece.x,piece.y,(sbyte) rotatedDirection);
+            var newPiece = new Piece(piece.kind, piece.x,piece.y,rotatedDirection);
             if (!board.CollidesFast(newPiece, pieceShapes)) {
                 rotation = 0;
                 rotated = newPiece;
@@ -47,7 +47,7 @@ namespace Hikari.AI {
             var offsetTable = piece.kind == PieceKind.I ? RotationTableI[KeyToIndex(key)] : RotationTable[KeyToIndex(key)];
             
             for (var i = 0; i < 4; i++) {
-                newPiece = piece.WithOffset(offsetTable[i]);
+                newPiece = piece.WithOffset(offsetTable[i]).WithSpin(rotatedDirection);
                 if (!board.CollidesFast(newPiece, pieceShapes)) {
                     rotation = i + 1;
                     rotated = newPiece;
@@ -74,9 +74,9 @@ namespace Hikari.AI {
             }
         }
         
-        private static int GetRotatedDirection(int from, bool cw) {
-            if (cw) return (from + 1) % 4;
-            else return from == 0 ? 3 : from - 1;
+        private static sbyte GetRotatedDirection(int from, bool cw) {
+            if (cw) return (sbyte) ((from + 1) % 4);
+            else return (sbyte) (from == 0 ? 3 : from - 1);
         }
     
     }
