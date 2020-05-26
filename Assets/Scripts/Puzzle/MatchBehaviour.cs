@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using TMPro;
 using UniRx;
 using UnityEngine;
+using UnityEngine.LowLevel;
 
 namespace Hikari.Puzzle {
     public class MatchBehaviour : MonoBehaviour {
@@ -12,7 +14,12 @@ namespace Hikari.Puzzle {
         private IDisposable countdownSubscription;
 
         [SerializeField] private List<TMP_Text> countdownTexts;
-        
+
+        private void Awake() {
+            var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
+            PlayerLoopHelper.Initialize(ref playerLoop);
+        }
+
         private void Start() {
             match = new Match();
             gameView1.game = match.game1;

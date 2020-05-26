@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using Hikari.AI.Utils.Collection;
 using Hikari.Puzzle;
 using Unity.Collections;
@@ -87,6 +86,8 @@ namespace Hikari.AI {
                 
             }
 
+            passed.Dispose();
+            checkQueue.Dispose();
             return lookup;
         }
 

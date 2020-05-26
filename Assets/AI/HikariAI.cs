@@ -46,6 +46,7 @@ namespace Hikari.AI {
         private int completionDelay;
 
         private const int MaxCompletionDelay = 3;
+        private const int MaxNodes = 10_000_000;
 
         private bool requestNextMove;
         private Move? lastMove;
@@ -126,7 +127,7 @@ namespace Hikari.AI {
             // Ensure that I can expand tree
             if (!nextPieces.IsCreated || nextPieces.Count <= 1) return;
 
-            if (!isAdvancingTree) {
+            if (!isAdvancingTree && tree.Length < MaxNodes) {
                 PrepareAndScheduleJobs();
             }
         }
@@ -142,21 +143,20 @@ namespace Hikari.AI {
             foreach (var node in rootChildren.Select((n,i) => new IndexedNode(rootChildrenRef.start + i,n)).OrderByDescending(n => n.node.visits)) {
                 var b = boards[node.node.parent];
                 var move = PathFinder.FindPath(ref b, node.node.piece, pieceShapes);
-                if (move != null) {
-                    lastMove = move.Value;
-                    requestNextMove = false;
-                    var mv = move.Value;
-                    Debug.Log($"Move picked: {move.Value.piece.ToString()} / {length} Nodes / {maxDepth} Depth");
-                    var sb = new StringBuilder();
-                    for (var i = 0; i < move.Value.length; i++) {
-                        unsafe {
-                            sb.Append((Instruction)mv.instructions[i]).Append(' ');
-                        }
+                if (move == null) continue;
+                lastMove = move.Value;
+                requestNextMove = false;
+                var mv = move.Value;
+                Debug.Log($"Move picked: {move.Value.piece.ToString()} / {length} Nodes / {maxDepth} Depth");
+                var sb = new StringBuilder();
+                for (var i = 0; i < move.Value.length; i++) {
+                    unsafe {
+                        sb.Append((Instruction)mv.instructions[i]).Append(' ');
                     }
-                    Debug.Log(sb.ToString());
-                    picked = node.index;
-                    return true;
                 }
+                Debug.Log(sb.ToString());
+                picked = node.index;
+                return true;
             }
 
             picked = -1;

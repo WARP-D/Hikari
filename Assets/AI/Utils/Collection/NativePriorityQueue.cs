@@ -1,5 +1,6 @@
 using System;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace Hikari.AI.Utils.Collection {
     public struct NativePriorityQueue<T> : IDisposable where T : struct, IComparable<T> {
@@ -48,6 +49,7 @@ namespace Hikari.AI.Utils.Collection {
             }
 
             value = list[0];
+            list.RemoveAtSwapBack(0);
             var parent = 0;
             while (true) {
                 var child = 2 * parent + 1;
@@ -62,7 +64,6 @@ namespace Hikari.AI.Utils.Collection {
                 } else break;
             }
 
-            list.RemoveAtSwapBack(list.Length-1);
             return true;
         }
 

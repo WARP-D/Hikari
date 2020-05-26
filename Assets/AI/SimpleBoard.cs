@@ -84,10 +84,8 @@ namespace Hikari.AI {
         }
 
         public bool CollidesFast(int4 shape, int2 pos) {
-            // if (pos.x <= -3 || 12 <= pos.x) return true;
             shape <<= pos.x + 3;
             for (var i = 0; i < 4; i++) {
-                // if (shape[i] >= 0b1_00000_00000) return true;
                 
                 var y = pos.y + i;
                 var pieceLine = shape[i];
@@ -194,11 +192,12 @@ namespace Hikari.AI {
         
         public SimpleBoard AddPieceFast(in Piece piece, NativeArray<int4x4> shapeRef) {
             var x = (int)piece.x;
-            var shape = shapeRef[(int) piece.kind][piece.spin] << x;
+            var shape = x >= 0 ? shapeRef[(int) piece.kind][piece.spin] << x
+                : shapeRef[(int)piece.kind][piece.spin] >> -x;
             
             var newBoard = new SimpleBoard();
             
-            fixed(ushort* cPtr = cells) UnsafeUtility.MemCpy(newBoard.cells,cPtr,2 * Length);
+            fixed(ushort* cPtr = cells) UnsafeUtility.MemCpy(newBoard.cells,cPtr,sizeof(ushort) * Length);
             
             for (var i = 0; i < 4; i++) {
                 var y = i + piece.y;
