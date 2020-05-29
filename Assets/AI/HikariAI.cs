@@ -34,7 +34,7 @@ namespace Hikari.AI {
         private NativeList<ExpandResult> expandedList;
         private NativeArray<PieceKind> nextPiecesArray;
         private NativeArray<int4> evaluations;
-        private NativeMultiHashMap<int, Node> expandedMap;
+        private NativeMultiHashMap<int, Pair<Node, SimpleBoard>> resultsMap;
         private NativeList<Node> advancedTree;
         private NativeList<SimpleBoard> advancedBoards;
 
@@ -50,14 +50,16 @@ namespace Hikari.AI {
 
         private bool requestNextMove;
         private Move? lastMove;
+        private Board resetBoard;
 
         public int length;
         public int maxDepth;
+        public SimpleBoard lastBoard;
 
-        public bool useHold = false;
+        public bool useHold = true;
         private bool isAdvancingTree;
 
-        public int ParallelCount { get; set; } = 7 * 30;
+        public int ParallelCount { get; set; } = 300;
         public int MinDepth { get; set; } = 2;
 
         public void Start() {
@@ -96,17 +98,17 @@ namespace Hikari.AI {
                 if (!jobHandle.IsCompleted) {
                     if (completionDelay < MaxCompletionDelay) {
                         completionDelay++;
-                        Debug.Log(
-                            $"Jobs are not completed, I'll delay completion for {MaxCompletionDelay - completionDelay} more frame{(MaxCompletionDelay - completionDelay == 1 ? "" : "s")}");
+                        // Debug.Log($"Jobs are not completed, I'll delay completion for {MaxCompletionDelay - completionDelay} more frame{(MaxCompletionDelay - completionDelay == 1 ? "" : "s")}");
                         return;
                     }
 
-                    Debug.LogWarning("Jobs are still not completed, but I force to complete");
+                    // Debug.LogWarning("Jobs are still not completed, but I force to complete");
                 }
 
                 completionDelay = 0;
 
                 jobHandle.Complete();
+                if (boards.IsCreated && boards.Length > 0) lastBoard = boards[root];
                 if (requestNextMove) {
                     if (CreateNextMove(out var picked)) {
                         advanceJobHandle = AdvanceTree(picked);
@@ -121,6 +123,20 @@ namespace Hikari.AI {
                 maxDepth = math.max(maxDepth, selectJob.depths.Max());
                 DisposeJobs();
                 scheduled = false;
+            }
+
+            if (resetBoard != null) {
+                DisposeTrees();
+                tree = new NativeList<Node>(1_000_000, Allocator.Persistent) {
+                    new Node(-1)
+                };
+                boards = new NativeList<SimpleBoard>(1_000_000,Allocator.Persistent) {
+                    new SimpleBoard(resetBoard)
+                };
+                
+                
+                resetBoard = null;
+                return;
             }
 
             // Add pieces to queue if provided
@@ -146,14 +162,27 @@ namespace Hikari.AI {
             var rootChildren = new NativeSlice<Node>(tree, rootChildrenRef.start, rootChildrenRef.length);
             foreach (var node in rootChildren.Select((n, i) => new IndexedNode(rootChildrenRef.start + i, n))
                 .OrderByDescending(n => n.node.visits)) {
+
+                if (node.node.holdOnly) {
+                    lastMove = Move.HoldOnlyMove;
+                    requestNextMove = false;
+                    
+                    Debug.Log($"Move picked: HOLD / {length} Nodes / {maxDepth} Depth");
+                    picked = node.index;
+                    return true;
+                }
+                
                 var b = boards[node.node.parent];
-                var move = PathFinder.FindPath(ref b, node.node.piece, pieceShapes);
+                var move = PathFinder.FindPath(ref b, node.node, pieceShapes);
+                
                 if (move == null) continue;
+                
                 lastMove = move.Value;
                 requestNextMove = false;
                 var mv = move.Value;
                 Debug.Log($"Move picked: {move.Value.piece.ToString()} / {length} Nodes / {maxDepth} Depth");
                 var sb = new StringBuilder();
+                if (mv.hold) sb.Append("Hold ");
                 for (var i = 0; i < move.Value.length; i++) {
                     unsafe {
                         sb.Append((Instruction) mv.instructions[i]).Append(' ');
@@ -223,16 +252,16 @@ namespace Hikari.AI {
             };
             jobHandle = evaluateJob.Schedule(expandedList, 1, jobHandle);
 
-            expandedMap = new NativeMultiHashMap<int, Node>(parallelCount * 300, Allocator.TempJob);
+            resultsMap = new NativeMultiHashMap<int, Pair<Node,SimpleBoard>>(parallelCount * 300, Allocator.TempJob);
             reorderChildrenJob = new ReorderChildrenJob {
                 expandResults = expandedList,
                 evaluations = evaluations,
-                map = expandedMap.AsParallelWriter()
+                map = resultsMap.AsParallelWriter()
             };
             jobHandle = reorderChildrenJob.Schedule(expandedList, 4, jobHandle);
 
             treeWriteJob = new TreeWriteJob {
-                map = expandedMap,
+                map = resultsMap,
                 tree = tree,
                 boards = boards,
                 pieceShapes = pieceShapes
@@ -286,8 +315,8 @@ namespace Hikari.AI {
             //todo
         }
 
-        public void Reset(IEnumerable<ushort> lines, bool b2b, uint combo) {
-            //todo
+        public void Reset(Board board) {
+            resetBoard = board;
         }
 
         public void Dispose() {
@@ -295,14 +324,18 @@ namespace Hikari.AI {
 
             DisposeJobs();
 
+            DisposeTrees();
+            if (nextPieces.IsCreated) nextPieces.Dispose();
+            if (pieceShapes.IsCreated) pieceShapes.Dispose();
+        }
+
+        private void DisposeTrees() {
             if (tree.IsCreated) tree.Dispose();
             if (boards.IsCreated) boards.Dispose();
 
             if (advancedTree.IsCreated) advancedTree.Dispose();
             if (advancedBoards.IsCreated) advancedBoards.Dispose();
 
-            if (nextPieces.IsCreated) nextPieces.Dispose();
-            if (pieceShapes.IsCreated) pieceShapes.Dispose();
         }
 
         private void DisposeJobs(JobHandle inputDeps = default, bool scheduleBatchedJobs = false) {
@@ -312,10 +345,14 @@ namespace Hikari.AI {
             if (selectJob.retryCounts.IsCreated) selectJob.retryCounts.Dispose(inputDeps);
             if (expandedList.IsCreated) expandedList.Dispose(inputDeps);
             if (evaluations.IsCreated) evaluations.Dispose(inputDeps);
-            if (expandedMap.IsCreated) expandedMap.Dispose(inputDeps);
+            if (resultsMap.IsCreated) resultsMap.Dispose(inputDeps);
             if (nextPiecesArray.IsCreated) nextPiecesArray.Dispose(inputDeps);
 
             if (scheduleBatchedJobs) JobHandle.ScheduleBatchedJobs();
+        }
+        
+        private static int SumInt4(int4 i4) {
+            return i4.x + i4.y + i4.z + i4.w;
         }
     }
 }

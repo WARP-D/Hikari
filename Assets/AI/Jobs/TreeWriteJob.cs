@@ -1,3 +1,4 @@
+using Hikari.Puzzle;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -6,7 +7,7 @@ using Unity.Mathematics;
 namespace Hikari.AI.Jobs {
     [BurstCompile]
     public struct TreeWriteJob : IJob {
-        [ReadOnly] public NativeMultiHashMap<int, Node> map;
+        [ReadOnly] public NativeMultiHashMap<int, Pair<Node, SimpleBoard>> map;
         [ReadOnly] public NativeArray<int4x4> pieceShapes;
         public NativeList<Node> tree;
         public NativeList<SimpleBoard> boards;
@@ -21,8 +22,9 @@ namespace Hikari.AI.Jobs {
                 var values = map.GetValuesForKey(keys[i]);
                 var c = 0;
                 while (values.MoveNext()) {
-                    tree.Add(values.Current);
-                    boards.Add(boards[values.Current.parent].AddPieceFast(values.Current.piece, pieceShapes));
+                    var (node, board) = values.Current;
+                    tree.Add(node);
+                    boards.Add(board);
                     c++;
                 }
 

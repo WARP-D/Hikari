@@ -12,10 +12,14 @@ namespace Hikari.AI {
 
         private bool nextMoveRequested;
         private Queue<Instruction> instructions = new Queue<Instruction>();
+        private bool holdRequired;
+        private bool holdOnly;
         private bool manipulating;
         private bool waitingForSonicDrop;
         private int hypertap;
 
+        [SerializeField] private bool debugView;
+        
         [SerializeField] private TMP_Text length;
         [SerializeField] private TMP_Text depth;
         [SerializeField] private TMP_Text parallelCount;
@@ -30,6 +34,9 @@ namespace Hikari.AI {
             ai.Start();
             preview.gameObject.SetActive(false);
 
+            game.EventStream.OfType<Game.IGameEvent, Game.InitializedEvent>().Subscribe(e => {
+                ai.Reset(game.Board);
+            });
             game.EventStream.OfType<Game.IGameEvent, Game.QueueUpdatedEvent>().Subscribe(e => {
                 ai.AddNextPiece(e.kind);
             }).AddTo(this);
@@ -37,6 +44,15 @@ namespace Hikari.AI {
                 ai.RequestNextMove();
                 nextMoveRequested = true;
             }).AddTo(this);
+        }
+
+        private void OnGUI() {
+            if (!debugView) return;
+            for (var y = 0; y < 20; y++) {
+                for (var x = 0; x < 10; x++) {
+                    if (ai.lastBoard.Occupied(x,y)) GUI.Box(new Rect(x*30,600-y*30,30,30),(Texture) null);
+                }
+            }
         }
 
         private void Update() {
@@ -50,6 +66,10 @@ namespace Hikari.AI {
                     manipulating = true;
                     instructions.Clear();
                     if (move.HasValue) {
+                        if (move.Value.holdOnly) {
+                            holdOnly = true;
+                            return;
+                        }
                         preview.gameObject.SetActive(true);
                         preview.piece = move.Value.piece;
                         preview.MakeShapeAndColor();
@@ -57,6 +77,8 @@ namespace Hikari.AI {
                         for (var i = 0; i < move.Value.length; i++) {
                             instructions.Enqueue(move.Value.GetInstructionAt(i));
                         }
+
+                        if (move.Value.hold) holdRequired = true;
                     }
                 }
             }
@@ -72,12 +94,26 @@ namespace Hikari.AI {
             if (waitingForSonicDrop) {
                 if (game.IsCurrentPieceGrounded) waitingForSonicDrop = false;
             }
+            
+            if (holdOnly) {
+                hypertap--;
+                holdOnly = false;
+                manipulating = false;
+                hypertap = 0;
+                return Command.Hold;
+            }
+            
+            Command cmd = 0;
+            
+            if (holdRequired) {
+                holdRequired = false;
+                return Command.Hold;
+            }
 
             if (hypertap++ % 2 != 0) {
                 return waitingForSonicDrop ? Command.SoftDrop : 0;
             }
-
-            Command cmd = 0;
+            
 
             if (waitingForSonicDrop) {
                 cmd |= Command.SoftDrop;

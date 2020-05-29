@@ -3,6 +3,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 
 namespace Hikari.AI {
+    // Light-weight movement iterator
     public static class Avenir {
         public static NativeHashMap<Piece, Move> Generate(ref SimpleBoard board, Piece spawned,
             NativeArray<int4x4> pieceShapes) {

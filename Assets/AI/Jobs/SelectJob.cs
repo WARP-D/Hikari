@@ -37,17 +37,16 @@ namespace Hikari.AI.Jobs {
                     goto exec;
                 }
 
-                Select(ref current, depth, ref rng);
+                Select(ref current, ref rng);
             }
 
-            var selectResult = new SelectResult(current,
-                boards[current.index].holdingSomething ? pieceQueue[depth + 1] : pieceQueue[depth]);
+            var selectResult = new SelectResult(current, pieceQueue[depth]);
             selected[i] = selectResult;
             depths[i] = depth;
             retryCounts[i] = retryCount;
         }
 
-        private unsafe void Select(ref IndexedNode current, int depth, ref Random rng) {
+        private unsafe void Select(ref IndexedNode current, ref Random rng) {
             var children = current.node.children;
             var weights = stackalloc float[children.length];
             // var weights = new NativeArray<float>(children.length,Allocator.Temp);
@@ -56,9 +55,9 @@ namespace Hikari.AI.Jobs {
             for (var j = 0; j < children.length; j++) {
                 var child = tree[children.start + j];
 
-                var q = child.visits != 0 ? SumInt4(child.evalSum / child.visits) : 0;
-                var u = 1f * math.sqrt(current.node.visits) / (1 + child.visits);
-                var s = 1 * 10 * SumInt4(current.node.evalSelf);
+                var q = 0.01f * (child.visits != 0 ? 10 * SumInt4(child.evalSum) / child.visits : 0);
+                var u = 100f * math.sqrt(current.node.visits) / (1 + child.visits);
+                var s = 1 * 4 * SumInt4(current.node.evalSelf);
 
                 var a = q + u + s;
                 weights[j] = a;
@@ -66,10 +65,10 @@ namespace Hikari.AI.Jobs {
                 if (a < min) min = a;
             }
 
-            sum += -min * children.length;
+            sum += (100 - min) * children.length;
 
             for (var j = 0; j < children.length; j++) {
-                weights[j] = (weights[j] - min) / sum;
+                weights[j] = (weights[j] - min + 100) / sum;
             }
 
             var rand = rng.NextFloat(0f, 1f);

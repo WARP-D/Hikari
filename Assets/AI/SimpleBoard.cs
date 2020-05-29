@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Hikari.Utils;
 using Hikari.Puzzle;
 using Unity.Collections;
@@ -8,14 +9,13 @@ using Unity.Mathematics;
 namespace Hikari.AI {
     public unsafe struct SimpleBoard {
         public fixed ushort cells[Length];
-        public readonly bool backToBack;
-        public readonly bool holdingSomething;
-        public readonly PieceKind reserve;
-        public readonly Bag bag;
-        public readonly uint ren;
+        public bool backToBack;
+        public PieceKind? hold;
+        public Bag bag;
+        public uint ren;
 
         private const ushort FilledLine = 0b11111_11111;
-        private const int Length = 20;
+        public const int Length = 20;
 
         private static readonly int4[] FullTSpinCheckPoints = {
             new int4(0, 0, 2, 0),
@@ -39,8 +39,18 @@ namespace Hikari.AI {
             ren = default; //TODO
             backToBack = default;
             bag = default;
-            reserve = default;
-            holdingSomething = false;
+            hold = null;
+        }
+
+        public SimpleBoard(Board board) {
+            for (var i = 0; i < Length; i++) {
+                cells[i] = board.row[i].ToBitFlags();
+            }
+
+            ren = board.ren;
+            backToBack = board.b2b;
+            bag = board.bag;
+            hold = board.holdPiece;
         }
 
         public NativeArray<ushort> GetCells() {
@@ -50,6 +60,12 @@ namespace Hikari.AI {
             }
 
             return na;
+        }
+
+        public Piece? Spawn(PieceKind pk) {
+            var piece = new Piece(pk,3,(sbyte) (pk == PieceKind.I ? 17 : 18), 0);
+            if (Collides(piece)) piece = piece.WithOffset(0, 1);
+            return Collides(piece) ? (Piece?) null : piece;
         }
 
         public bool Collides(in Piece piece) {
@@ -107,6 +123,7 @@ namespace Hikari.AI {
             return CollidesFast(pieceShapes[(int) piece.kind][piece.spin], new int2(piece.x, piece.y));
         }
 
+        [Obsolete]
         public bool Grounded(in Piece piece) {
             if (Collides(piece)) return false;
             var sonicDropped = SonicDrop(piece);
@@ -166,6 +183,7 @@ namespace Hikari.AI {
             return prevDrop;
         }
 
+        [Obsolete]
         public SimpleBoard AddPiece(in Piece piece) {
             var shape = new NativeArray<int>(4, Allocator.Temp);
             piece.CopyNativeShape(ref shape);
@@ -196,7 +214,7 @@ namespace Hikari.AI {
                 ? shapeRef[(int) piece.kind][piece.spin] << x
                 : shapeRef[(int) piece.kind][piece.spin] >> -x;
 
-            var newBoard = new SimpleBoard();
+            var newBoard = new SimpleBoard {bag = bag, hold = hold};
 
             fixed (ushort* cPtr = cells) UnsafeUtility.MemCpy(newBoard.cells, cPtr, sizeof(ushort) * Length);
 
@@ -252,37 +270,63 @@ namespace Hikari.AI {
             } else return TSpinStatus.None;
         }
 
-        public SimpleLockResult Lock(in Piece piece, out SimpleBoard output) {
-            var board = AddPiece(piece);
+        public SimpleLockResult LockFast(in Piece piece, PieceKind? heldPiece, NativeArray<int4x4> pieceShapes, out SimpleBoard nextBoard, bool useBag) {
+            nextBoard = AddPieceFast(piece,pieceShapes);
+
+            if (heldPiece.HasValue) {
+                nextBoard.hold = heldPiece.Value;
+            }
 
             var clearedLines = new NativeList<int>(4, Allocator.Temp);
 
             for (var i = 0; i < Length; i++) {
-                if (cells[i] == FilledLine) clearedLines.Add(i);
+                if (nextBoard.cells[i] == FilledLine) clearedLines.Add(i);
             }
 
             for (var i = 0; i < clearedLines.Length; i++) {
                 for (var j = clearedLines[i]; j < Length - 1; j++) {
-                    cells[j] = cells[j + 1];
+                    nextBoard.cells[j] = nextBoard.cells[j + 1];
                 }
 
-                cells[Length - 1 - i] = 0;
+                nextBoard.cells[Length - 1 - i] = 0;
             }
 
             var pc = true;
             for (var i = 0; i < Length; i++) {
-                if (cells[i] != 0) pc = false;
+                if (nextBoard.cells[i] != 0) pc = false;
             }
 
             var placementKind = PlacementKindFactory.Create((uint) clearedLines.Length, piece.tSpin);
-
-            output = board;
+            
             clearedLines.Dispose();
 
-            return new SimpleLockResult(placementKind,
-                pc,
-                placementKind.IsLineClear() ? ren + 1 : 0,
-                (uint) (placementKind.GetGarbage() + (backToBack && placementKind.IsContinuous() ? 1 : 0)));
+            var nextRen = placementKind.IsLineClear() ? ren + 1 : 0;
+            var garbage = (uint) (placementKind.GetGarbage() + (backToBack && placementKind.IsContinuous() ? 1 : 0));
+
+            if (useBag) {
+                var nextBag = bag;
+                if (nextBag.Take(piece.kind)) {
+                    nextBoard.bag = nextBag;
+                }
+            }
+
+            return new SimpleLockResult(placementKind, pc, nextRen, garbage);
+        }
+
+        public SimpleBoard WithHold(PieceKind kind, bool useBag) {
+            var newBoard = new SimpleBoard();
+            newBoard.ren = ren;
+            newBoard.backToBack = backToBack;
+            fixed (ushort* cPtr = cells) UnsafeUtility.MemCpy(newBoard.cells, cPtr, sizeof(ushort) * Length);
+            
+            newBoard.hold = kind;
+            if (useBag) {
+                var bag = this.bag;
+                bag.Take(kind);
+                newBoard.bag = bag;
+            }
+
+            return newBoard;
         }
     }
 }

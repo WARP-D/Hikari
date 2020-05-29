@@ -7,10 +7,17 @@ namespace Hikari.AI {
 
         public fixed byte instructions[MaxInstructions];
         public byte length;
+        public bool hold;
+        public bool holdOnly;
         public Piece piece;
         public int time;
 
         public bool IsFull => length == MaxInstructions;
+
+        public static Move HoldOnlyMove { get; } = new Move {
+            holdOnly = true,
+            hold = false
+        };
 
         public Move Append(Instruction inst, int t, Piece p) {
             if (IsFull) throw new Exception();

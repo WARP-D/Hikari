@@ -7,6 +7,7 @@ namespace Hikari.AI {
 
         public Piece piece;
         public bool holdUsed;
+        public bool holdOnly;
         public int parent;
         public ChildrenRef children;
         public int4 evalSelf;
@@ -20,19 +21,21 @@ namespace Hikari.AI {
             evalSelf = default;
             evalSum = default;
             holdUsed = false;
+            holdOnly = false;
             visits = 1;
             piece = default;
         }
 
-        public Node(int parent, int4 evaluation, Piece piece) {
+        public Node(int parent, int4 evaluation, Move mv) {
             valid = true;
             this.parent = parent;
             children = default;
             evalSelf = evaluation;
             evalSum = default;
-            holdUsed = false;
+            holdUsed = mv.hold;
+            holdOnly = mv.holdOnly;
             visits = 1;
-            this.piece = piece;
+            piece = mv.piece;
         }
     }
 }

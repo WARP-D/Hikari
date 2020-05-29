@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UniRx;
+using Unity.Mathematics;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace Hikari.Puzzle {
     public class Game {
-        private Match match;
+        public Match match;
         public PlayerInfo Player { get; private set; }
         public Board Board { get; private set; }
         public Piece? CurrentPiece { get; private set; }
@@ -48,6 +49,7 @@ namespace Hikari.Puzzle {
                     foreach (var piece in Board.nextPieces) {
                         eventSubject.OnNext(new QueueUpdatedEvent(piece));
                     }
+                    eventSubject.OnNext(new InitializedEvent());
                 });
             this.match.EventStream.OfType<Match.IMatchEvent, Match.StartEvent>()
                 .Subscribe(e => SpawnNewPiece());
@@ -256,7 +258,7 @@ namespace Hikari.Puzzle {
             }
         }
 
-        public static uint[] RenAttacks { get; } = {
+        public static readonly int[] RenAttacks = {
             0, 0, // 0, 1 combo
             1, 1, // 2, 3 combo
             2, 2, // 4, 5 combo
@@ -264,6 +266,9 @@ namespace Hikari.Puzzle {
             4, 4, 4, // 8, 9, 10 combo
             5 // 11+ combo
         };
+
+        public static int GetRenAttack(int renCount) => RenAttacks[math.clamp(renCount, 0, 11)];
+        public static int GetRenAttack(uint renCount) => RenAttacks[math.min(renCount, 11)];
 
         public struct PlayerInfo {
             public int ID { get; set; }
@@ -279,6 +284,10 @@ namespace Hikari.Puzzle {
             public QueueUpdatedEvent(PieceKind kind) {
                 this.kind = kind;
             }
+        }
+        
+        public class InitializedEvent : IGameEvent {
+            
         }
 
         public class PieceSpawnedEvent : IGameEvent {

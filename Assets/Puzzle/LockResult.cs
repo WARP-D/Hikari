@@ -20,7 +20,7 @@ namespace Hikari.Puzzle {
             var b2bBonus = prevB2B && b2b && placementKind.IsLineClear();
             attack = (uint) ((perfectClear ? 10 : placementKind.GetGarbage())
                              + (b2bBonus ? 1 : 0)
-                             + (ren >= Game.RenAttacks.Length ? Game.RenAttacks.Last() : Game.RenAttacks[ren]));
+                             + Game.GetRenAttack(ren));
             this.clearedLines = clearedLines;
 
             // Debug.Log($"{placementKind.ToString()} {(b2bBonus ? " B2B" : "")} Combo{ren} {(perfectClear ? " Clear!" : "")}");

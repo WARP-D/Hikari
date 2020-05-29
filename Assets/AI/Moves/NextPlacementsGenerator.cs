@@ -10,8 +10,7 @@ namespace Hikari.AI {
     // Currently most of this code is a copy of Cold Clear, thanks to MinusKelvin(@Below0K)
     // But I want to make my original one later
     public static unsafe class NextPlacementsGenerator {
-        public static NativeHashMap<Piece, Move> Generate(ref SimpleBoard board, Piece spawned,
-            NativeArray<int4x4> pieceShapes) {
+        public static NativeHashMap<Piece, Move> Generate(ref SimpleBoard board, Piece spawned, NativeArray<int4x4> pieceShapes, bool holdUse) {
             var columns = stackalloc int[10];
             var maxHeights = stackalloc byte[10];
             board.GetColumns(columns, maxHeights);
@@ -30,12 +29,12 @@ namespace Hikari.AI {
                 var maxI = GetMaxStartsIndex(spawned.kind);
                 for (var i = 0; i <= maxI; i++) {
                     var start = GetStarts(spawned.kind, i);
-                    var m1 = start.ToMove();
+                    var m1 = start.ToMove(holdUse);
                     start.Dispose();
                     var originY = start.piece.y;
                     var piece = board.SonicDropFast(start.piece, pieceShapes);
                     m1.piece = piece;
-                    CheckAndAddLookup(ref board, ref lookup, m1, pieceShapes);
+                    Confirm(ref board, ref lookup, m1, pieceShapes);
                     var m2 = m1;
                     var dY = originY - piece.y;
                     m2.instructions[m2.length++] = (byte) SonicDrop;
@@ -46,6 +45,7 @@ namespace Hikari.AI {
                 var p = new Piece(spawned.kind);
                 var d = board.SonicDropFast(p, pieceShapes);
                 var m = new Move();
+                m.hold = holdUse;
                 m.piece = d;
                 m.instructions[0] = (byte) SonicDrop;
                 m.length = 1;
@@ -83,7 +83,7 @@ namespace Hikari.AI {
                 var pl = board.SonicDropFast(mv.piece, pieceShapes);
                 var mHard = mv;
                 mHard.piece = pl;
-                CheckAndAddLookup(ref board, ref lookup, mHard, pieceShapes);
+                Confirm(ref board, ref lookup, mHard, pieceShapes);
             }
 
             passed.Dispose();
@@ -91,7 +91,7 @@ namespace Hikari.AI {
             return lookup;
         }
 
-        private static void CheckAndAddLookup(ref SimpleBoard board, ref NativeHashMap<Piece, Move> lookup, Move mv,
+        private static void Confirm(ref SimpleBoard board, ref NativeHashMap<Piece, Move> lookup, Move mv,
             NativeArray<int4x4> pieceShapes) {
             if (!IsAboveStacking(mv.piece, 20) && !board.CollidesFast(mv.piece, pieceShapes)) {
                 lookup.TryAdd(mv.piece, mv);
@@ -185,10 +185,11 @@ namespace Hikari.AI {
                 this.time = time;
             }
 
-            public Move ToMove() {
+            public Move ToMove(bool holdUse) {
                 var m = new Move {
                     piece = piece,
-                    time = time
+                    time = time,
+                    hold = holdUse
                 };
                 for (var i = 0; i < instructions.Length; i++) {
                     m.instructions[i] = (byte) instructions[i];
