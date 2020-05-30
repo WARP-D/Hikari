@@ -18,8 +18,7 @@ namespace Hikari.AI.Jobs {
                 results[index] = new int4(0,0,0,0);
                 return;
             }
-            
-            var pl = ex.move.piece;
+
             var w = weight[0];
 
             var fieldSafety = 10000; //Represents how we can stand enemy's attack and dig garbage
@@ -46,35 +45,18 @@ namespace Hikari.AI.Jobs {
 
             if (lr.perfectClear) moveScore += w.perfect;
             moveScore += w.ren * Game.GetRenAttack(lr.ren);
-            switch (lr.placementKind) {
-                case PlacementKind.Clear1:
-                    moveScore += w.clear1;
-                    break;
-                case PlacementKind.Clear2:
-                    moveScore += w.clear2;
-                    break;
-                case PlacementKind.Clear3:
-                    moveScore += w.clear3;
-                    break;
-                case PlacementKind.Clear4:
-                    moveScore += w.clear4;
-                    break;
-                case PlacementKind.Mini1:
-                    moveScore += w.tMini1;
-                    break;
-                case PlacementKind.Mini2:
-                    moveScore += w.tMini2;
-                    break;
-                case PlacementKind.TSpin1:
-                    moveScore += w.tSpin1;
-                    break;
-                case PlacementKind.TSpin2:
-                    moveScore += w.tSpin2;
-                    break;
-                case PlacementKind.TSpin3:
-                    moveScore += w.tSpin3;
-                    break;
-            }
+            moveScore += lr.placementKind switch {
+                PlacementKind.Clear1 => w.clear1,
+                PlacementKind.Clear2 => w.clear2,
+                PlacementKind.Clear3 => w.clear3,
+                PlacementKind.Clear4 => w.clear4,
+                PlacementKind.Mini1 => w.tMini1,
+                PlacementKind.Mini2 => w.tMini2,
+                PlacementKind.TSpin1 => w.tSpin1,
+                PlacementKind.TSpin2 => w.tSpin2,
+                PlacementKind.TSpin3 => w.tSpin3,
+                _ => 0
+            };
 
             if (ex.move.piece.kind == PieceKind.T) {
                 switch (lr.placementKind) {

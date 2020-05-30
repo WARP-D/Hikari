@@ -15,8 +15,6 @@ namespace Hikari.AI.Jobs {
         [WriteOnly] public NativeArray<int> depths;
         [WriteOnly] public NativeArray<int> retryCounts;
 
-        private const int BaseScore = 1000;
-
         public void Execute(int i) {
             var retryCount = 0;
             var rng = rands[i];
@@ -85,7 +83,7 @@ namespace Hikari.AI.Jobs {
             // weights.Dispose();
         }
 
-        private int SumInt4(int4 i4) {
+        private static int SumInt4(int4 i4) {
             return i4.x + i4.y + i4.z + i4.w;
         }
     }

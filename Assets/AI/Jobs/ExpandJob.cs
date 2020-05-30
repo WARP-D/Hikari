@@ -43,7 +43,7 @@ namespace Hikari.AI.Jobs {
 
         private void Expand(int index, ref SimpleBoard board, PieceKind spawned, ref NativeList<ExpandResult> ret,
             bool useHold) {
-            var usePiece = useHold ? board.hold.Value : spawned;
+            var usePiece = useHold ? board.hold!.Value : spawned;
             var spawn = board.Spawn(usePiece);
             if (!spawn.HasValue) return;
             var moves = NextPlacementsGenerator.Generate(ref board, spawn.Value, pieceShapes, useHold);

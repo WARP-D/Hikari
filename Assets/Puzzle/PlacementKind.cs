@@ -63,51 +63,38 @@ namespace Hikari.Puzzle {
         }
 
         public static string GetFullName(this PlacementKind placementKind) {
-            switch (placementKind) {
-                case Clear1: return "Single";
-                case Clear2: return "Double";
-                case Clear3: return "Triple";
-                case Clear4: return "Quad";
-                case TSpin1: return "T-Spin Single";
-                case TSpin2: return "T-Spin Double";
-                case TSpin3: return "T-Spin Triple";
-                case Mini1: return "T-Spin Mini Single";
-                case Mini2: return "T-Spin Mini Double";
-                default: return "...";
-            }
+            return placementKind switch {
+                Clear1 => "Single",
+                Clear2 => "Double",
+                Clear3 => "Triple",
+                Clear4 => "Quad",
+                TSpin1 => "T-Spin Single",
+                TSpin2 => "T-Spin Double",
+                TSpin3 => "T-Spin Triple",
+                Mini1 => "T-Spin Mini Single",
+                Mini2 => "T-Spin Mini Double",
+                _ => "..."
+            };
         }
     }
 
     public static class PlacementKindFactory {
         public static PlacementKind Create(uint clearLine, TSpinStatus tSpin) {
-            switch (tSpin) {
-                case TSpinStatus.None:
-                    switch (clearLine) {
-                        case 0: return None;
-                        case 1: return Clear1;
-                        case 2: return Clear2;
-                        case 3: return Clear3;
-                        case 4: return Clear4;
-                        default: throw new ArgumentOutOfRangeException();
-                    }
-                case TSpinStatus.Mini:
-                    switch (clearLine) {
-                        case 0: return Mini;
-                        case 1: return Mini1;
-                        case 2: return Mini2;
-                        default: throw new ArgumentOutOfRangeException();
-                    }
-                case TSpinStatus.Full:
-                    switch (clearLine) {
-                        case 0: return TSpin;
-                        case 1: return TSpin1;
-                        case 2: return TSpin2;
-                        case 3: return TSpin3;
-                        default: throw new ArgumentOutOfRangeException();
-                    }
-            }
-
-            throw new ArgumentOutOfRangeException();
+            return (tSpin,clearLine) switch {
+                (TSpinStatus.None,0) => None,
+                (TSpinStatus.None,1) => Clear1,
+                (TSpinStatus.None,2) => Clear2,
+                (TSpinStatus.None,3) => Clear3,
+                (TSpinStatus.None,4) => Clear4,
+                (TSpinStatus.Mini,0) => Mini,
+                (TSpinStatus.Mini,1) => Mini1,
+                (TSpinStatus.Mini,2) => Mini2,
+                (TSpinStatus.Full,0) => TSpin,
+                (TSpinStatus.Full,1) => TSpin1,
+                (TSpinStatus.Full,2) => TSpin2,
+                (TSpinStatus.Full,3) => TSpin3,
+                _ => throw new ArgumentException()
+            };
         }
     }
 }
