@@ -7,10 +7,8 @@ using Unity.Mathematics;
 namespace Hikari.AI.Jobs {
     [BurstCompile]
     public unsafe struct EvaluateJob : IJobParallelForDefer {
-        [ReadOnly] public NativeArray<SimpleBoard> boards;
         [ReadOnly] public NativeArray<ExpandResult> inputs;
         [ReadOnly, DeallocateOnJobCompletion] public NativeArray<Weights> weight;
-        [ReadOnly] public NativeArray<int4x4> pieceShapes;
         [WriteOnly] public NativeArray<int4> results;
 
         public void Execute(int index) {

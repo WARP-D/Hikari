@@ -7,7 +7,6 @@ namespace Hikari.AI.Jobs {
     [BurstCompile]
     public struct TreeWriteJob : IJob {
         [ReadOnly] public NativeMultiHashMap<int, Pair<Node, SimpleBoard>> map;
-        [ReadOnly] public NativeArray<int4x4> pieceShapes;
         public NativeList<Node> tree;
         public NativeList<SimpleBoard> boards;
 

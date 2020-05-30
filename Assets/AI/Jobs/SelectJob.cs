@@ -8,7 +8,6 @@ namespace Hikari.AI.Jobs {
     [BurstCompile]
     public struct SelectJob : IJobParallelFor {
         [ReadOnly] public NativeArray<Node> tree;
-        [ReadOnly] public NativeArray<SimpleBoard> boards;
         [ReadOnly] public NativeArray<PieceKind> pieceQueue;
         [ReadOnly, DeallocateOnJobCompletion] public NativeArray<int> rootIndex;
         [ReadOnly] public NativeArray<Random> rands;

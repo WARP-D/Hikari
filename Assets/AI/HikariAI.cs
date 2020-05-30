@@ -216,7 +216,6 @@ namespace Hikari.AI {
             selectedArray = new NativeArray<SelectResult>(parallelCount, Allocator.TempJob);
             selectJob = new SelectJob {
                 tree = tree.AsDeferredJobArray(),
-                boards = boards.AsDeferredJobArray(),
                 rootIndex = new NativeArray<int>(1, Allocator.TempJob) {
                     [0] = root
                 },
@@ -246,9 +245,7 @@ namespace Hikari.AI {
                 weight = new NativeArray<Weights>(1, Allocator.TempJob) {
                     [0] = Weights.Default
                 },
-                pieceShapes = pieceShapes,
-                results = evaluations,
-                boards = boards.AsDeferredJobArray()
+                results = evaluations
             };
             jobHandle = evaluateJob.Schedule(expandedList, 1, jobHandle);
 
@@ -263,8 +260,7 @@ namespace Hikari.AI {
             treeWriteJob = new TreeWriteJob {
                 map = resultsMap,
                 tree = tree,
-                boards = boards,
-                pieceShapes = pieceShapes
+                boards = boards
             };
             jobHandle = treeWriteJob.Schedule(jobHandle);
 
