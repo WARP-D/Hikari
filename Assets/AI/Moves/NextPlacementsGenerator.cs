@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using Hikari.AI.Utils.Collection;
 using Hikari.Puzzle;
 using Unity.Collections;
@@ -10,7 +11,8 @@ namespace Hikari.AI {
     // Currently most of this code is a copy of Cold Clear, thanks to MinusKelvin(@Below0K)
     // But I want to make my original one later
     public static unsafe class NextPlacementsGenerator {
-        public static NativeHashMap<Piece, Move> Generate(ref SimpleBoard board, Piece spawned, NativeArray<int4x4> pieceShapes, bool holdUse) {
+        public static NativeHashMap<Piece, Move> Generate(ref SimpleBoard board, Piece spawned,
+            NativeArray<int4x4> pieceShapes, bool holdUse) {
             var columns = stackalloc int[10];
             var maxHeights = stackalloc byte[10];
             board.GetColumns(columns, maxHeights);
@@ -26,21 +28,21 @@ namespace Hikari.AI {
             }
 
             if (maxHeight < 16) {
-                var maxI = GetMaxStartsIndex(spawned.kind);
-                for (var i = 0; i <= maxI; i++) {
-                    var start = GetStarts(spawned.kind, i);
-                    var m1 = start.ToMove(holdUse);
-                    start.Dispose();
+                var starts = GenerateStarts(spawned.kind, holdUse);
+                for (var i = 0; i < starts.Length; i++) {
+                    var start = starts[i];
                     var originY = start.piece.y;
                     var piece = board.SonicDropFast(start.piece, pieceShapes);
-                    m1.piece = piece;
-                    Confirm(ref board, ref lookup, m1, pieceShapes);
-                    var m2 = m1;
+                    start.piece = piece;
+                    Confirm(ref board, ref lookup, start, pieceShapes);
+                    var m2 = start;
                     var dY = originY - piece.y;
                     m2.instructions[m2.length++] = (byte) SonicDrop;
                     m2.time += dY * 2;
                     checkQueue.Enqueue(m2);
                 }
+            
+                starts.Dispose();
             } else {
                 var p = new Piece(spawned.kind);
                 var d = board.SonicDropFast(p, pieceShapes);
@@ -174,160 +176,115 @@ namespace Hikari.AI {
             return piece.y > maxHeight;
         }
 
-        private struct Starting : IDisposable {
-            public Piece piece;
-            public NativeList<Instruction> instructions;
-            public int time;
-
-            public Starting(Piece piece, NativeList<Instruction> instructions, int time) {
-                this.piece = piece;
-                this.instructions = instructions;
-                this.time = time;
-            }
-
-            public Move ToMove(bool holdUse) {
-                var m = new Move {
-                    piece = piece,
-                    time = time,
-                    hold = holdUse
-                };
-                for (var i = 0; i < instructions.Length; i++) {
-                    m.instructions[i] = (byte) instructions[i];
-                }
-
-                m.length = (byte) instructions.Length;
-                return m;
-            }
-
-            public Starting(PieceKind kind, sbyte x, sbyte spin, NativeList<Instruction> instructions, int time)
-                : this(new Piece(kind, x, 19, spin), instructions, time) { }
-
-            public void Dispose() {
-                instructions.Dispose();
-            }
-        }
-
-        private static int GetMaxStartsIndex(PieceKind p) => p == O ? 8 : 33;
-
-        private static Starting GetStarts(PieceKind p, int i, Allocator a = Allocator.Temp) {
+        private static NativeArray<Move> GenerateStarts(PieceKind p, bool holdUsed) {
+            var moves = new NativeArray<Move>(p == O ? 9 : 34, Allocator.Temp);
             if (p == O) {
-                switch (i) {
-                    case 0: return new Starting(O, 3, 0, new NativeList<Instruction>(a), 0);
-                    case 1: return new Starting(O, 2, 0, new NativeList<Instruction>(a) {Left}, 1);
-                    case 2: return new Starting(O, 4, 0, new NativeList<Instruction>(a) {Right}, 1);
-                    case 3: return new Starting(O, 1, 0, new NativeList<Instruction>(a) {Left, Left}, 3);
-                    case 4: return new Starting(O, 5, 0, new NativeList<Instruction>(a) {Right, Right}, 3);
-                    case 5: return new Starting(O, 0, 0, new NativeList<Instruction>(a) {Left, Left, Left}, 5);
-                    case 6: return new Starting(O, 6, 0, new NativeList<Instruction>(a) {Right, Right, Right}, 5);
-                    case 7: return new Starting(O, -1, 0, new NativeList<Instruction>(a) {Left, Left, Left, Left}, 7);
-                    case 8:
-                        return new Starting(O, 7, 0, new NativeList<Instruction>(a) {Right, Right, Right, Right}, 7);
-                    default: throw new ArgumentOutOfRangeException();
+                for (sbyte x = -1; x < 8; x++) {
+                    var mv = moves[x + 1];
+                    mv.hold = holdUsed;
+                    mv.piece = new Piece(O);
+                    MoveTo(x, 0, ref mv);
+                    moves[x + 1] = mv;
                 }
             } else if (p == I) {
-                switch (i) {
-                    case 0: return new Starting(I, 3, 0, new NativeList<Instruction>(a), 0);
-                    case 1: return new Starting(I, 2, 0, new NativeList<Instruction>(a) {Left}, 1);
-                    case 2: return new Starting(I, 4, 0, new NativeList<Instruction>(a) {Right}, 1);
-                    case 3: return new Starting(I, 1, 0, new NativeList<Instruction>(a) {Left, Left}, 3);
-                    case 4: return new Starting(I, 5, 0, new NativeList<Instruction>(a) {Right, Right}, 3);
-                    case 5: return new Starting(I, 0, 0, new NativeList<Instruction>(a) {Left, Left, Left}, 5);
-                    case 6: return new Starting(I, 6, 0, new NativeList<Instruction>(a) {Right, Right, Right}, 5);
+                for (sbyte x = 0; x < 7; x++) {
+                    var mv = new Move {
+                        hold = holdUsed,
+                        piece = new Piece(I)
+                    };
+                    MoveTo(x, 0, ref mv);
+                    moves[x] = mv;
+                }
 
-                    case 7: return new Starting(I, 3, 1, new NativeList<Instruction>(a) {Cw}, 1);
-                    case 8: return new Starting(I, 2, 1, new NativeList<Instruction>(a) {Left, Cw}, 2);
-                    case 9: return new Starting(I, 4, 1, new NativeList<Instruction>(a) {Right, Cw}, 2);
-                    case 10: return new Starting(I, 1, 1, new NativeList<Instruction>(a) {Left, Cw, Left}, 3);
-                    case 11: return new Starting(I, 5, 1, new NativeList<Instruction>(a) {Right, Cw, Right}, 3);
-                    case 12: return new Starting(I, 0, 1, new NativeList<Instruction>(a) {Left, Cw, Left, Left}, 5);
-                    case 13: return new Starting(I, 6, 1, new NativeList<Instruction>(a) {Right, Cw, Right, Right}, 5);
-                    case 14:
-                        return new Starting(I, -1, 1, new NativeList<Instruction>(a) {Left, Cw, Left, Left, Left}, 7);
-                    case 15:
-                        return new Starting(I, 7, 1, new NativeList<Instruction>(a) {Right, Cw, Right, Right, Right},
-                            7);
-                    case 16:
-                        return new Starting(I, -2, 1, new NativeList<Instruction>(a) {Left, Cw, Left, Left, Left, Left},
-                            9);
+                for (sbyte x = -2; x < 8; x++) {
+                    var mv = new Move {
+                        hold = holdUsed,
+                        piece = new Piece(I)
+                    };
+                    MoveTo(x, 1, ref mv);
+                    moves[7 + x + 2] = mv;
+                }
 
-                    case 17: return new Starting(I, 3, 3, new NativeList<Instruction>(a) {Ccw}, 1);
-                    case 18: return new Starting(I, 2, 3, new NativeList<Instruction>(a) {Left, Ccw}, 2);
-                    case 19: return new Starting(I, 4, 3, new NativeList<Instruction>(a) {Right, Ccw}, 2);
-                    case 20: return new Starting(I, 1, 3, new NativeList<Instruction>(a) {Left, Ccw, Left}, 3);
-                    case 21: return new Starting(I, 5, 3, new NativeList<Instruction>(a) {Right, Ccw, Right}, 3);
-                    case 22: return new Starting(I, 0, 3, new NativeList<Instruction>(a) {Left, Ccw, Left, Left}, 5);
-                    case 23: return new Starting(I, 6, 3, new NativeList<Instruction>(a) {Right, Ccw, Right, Right}, 5);
-                    case 24:
-                        return new Starting(I, -1, 3, new NativeList<Instruction>(a) {Left, Ccw, Left, Left, Left}, 7);
-                    case 25:
-                        return new Starting(I, 7, 3, new NativeList<Instruction>(a) {Right, Ccw, Right, Right, Right},
-                            7);
-                    case 26:
-                        return new Starting(I, 8, 3,
-                            new NativeList<Instruction>(a) {Right, Ccw, Right, Right, Right, Right}, 9);
+                for (sbyte x = -1; x < 9; x++) {
+                    var mv = new Move {
+                        hold = holdUsed,
+                        piece = new Piece(I)
+                    };
+                    MoveTo(x, 3, ref mv);
+                    moves[7 + 10 + x + 1] = mv;
+                }
 
-                    case 27: return new Starting(I, 3, 2, new NativeList<Instruction>(a) {Cw, Cw}, 3);
-                    case 28: return new Starting(I, 2, 2, new NativeList<Instruction>(a) {Cw, Left, Cw}, 3);
-                    case 29: return new Starting(I, 4, 2, new NativeList<Instruction>(a) {Cw, Right, Cw}, 3);
-                    case 30: return new Starting(I, 1, 2, new NativeList<Instruction>(a) {Cw, Left, Cw, Left}, 4);
-                    case 31: return new Starting(I, 5, 2, new NativeList<Instruction>(a) {Cw, Right, Cw, Right}, 4);
-                    case 32: return new Starting(I, 0, 2, new NativeList<Instruction>(a) {Left, Cw, Left, Cw, Left}, 5);
-                    case 33:
-                        return new Starting(I, 6, 2, new NativeList<Instruction>(a) {Right, Cw, Right, Cw, Right}, 5);
-                    default: throw new ArgumentOutOfRangeException();
+                for (sbyte x = 0; x < 7; x++) {
+                    var mv = new Move {
+                        hold = holdUsed,
+                        piece = new Piece(I)
+                    };
+                    MoveTo(x, 2, ref mv);
+                    moves[7 + 10 + 10 + x] = mv;
                 }
             } else {
-                switch (i) {
-                    case 0: return new Starting(p, 3, 0, new NativeList<Instruction>(a), 0);
-                    case 1: return new Starting(p, 2, 0, new NativeList<Instruction>(a) {Left}, 1);
-                    case 2: return new Starting(p, 4, 0, new NativeList<Instruction>(a) {Right}, 1);
-                    case 3: return new Starting(p, 1, 0, new NativeList<Instruction>(a) {Left, Left}, 3);
-                    case 4: return new Starting(p, 5, 0, new NativeList<Instruction>(a) {Right, Right}, 3);
-                    case 5: return new Starting(p, 0, 0, new NativeList<Instruction>(a) {Left, Left, Left}, 5);
-                    case 6: return new Starting(p, 6, 0, new NativeList<Instruction>(a) {Right, Right, Right}, 5);
-                    case 7:
-                        return new Starting(p, 7, 0, new NativeList<Instruction>(a) {Right, Right, Right, Right}, 7);
-
-                    case 8: return new Starting(p, 3, 1, new NativeList<Instruction>(a) {Cw}, 1);
-                    case 9: return new Starting(p, 2, 1, new NativeList<Instruction>(a) {Left, Cw}, 2);
-                    case 10: return new Starting(p, 4, 1, new NativeList<Instruction>(a) {Right, Cw}, 2);
-                    case 11: return new Starting(p, 1, 1, new NativeList<Instruction>(a) {Left, Cw, Left}, 3);
-                    case 12: return new Starting(p, 5, 1, new NativeList<Instruction>(a) {Right, Cw, Right}, 3);
-                    case 13: return new Starting(p, 0, 1, new NativeList<Instruction>(a) {Left, Cw, Left, Left}, 5);
-                    case 14: return new Starting(p, 6, 1, new NativeList<Instruction>(a) {Right, Cw, Right, Right}, 5);
-                    case 15:
-                        return new Starting(p, -1, 1, new NativeList<Instruction>(a) {Left, Cw, Left, Left, Left}, 7);
-                    case 16:
-                        return new Starting(p, 7, 1, new NativeList<Instruction>(a) {Right, Cw, Right, Right, Right},
-                            7);
-
-                    case 17: return new Starting(p, 3, 3, new NativeList<Instruction>(a) {Ccw}, 1);
-                    case 18: return new Starting(p, 2, 3, new NativeList<Instruction>(a) {Left, Ccw}, 2);
-                    case 19: return new Starting(p, 4, 3, new NativeList<Instruction>(a) {Right, Ccw}, 2);
-                    case 20: return new Starting(p, 1, 3, new NativeList<Instruction>(a) {Left, Ccw, Left}, 3);
-                    case 21: return new Starting(p, 5, 3, new NativeList<Instruction>(a) {Right, Ccw, Right}, 3);
-                    case 22: return new Starting(p, 0, 3, new NativeList<Instruction>(a) {Left, Ccw, Left, Left}, 5);
-                    case 23: return new Starting(p, 6, 3, new NativeList<Instruction>(a) {Right, Ccw, Right, Right}, 5);
-                    case 24:
-                        return new Starting(p, 7, 3, new NativeList<Instruction>(a) {Right, Ccw, Right, Right, Right},
-                            7);
-                    case 25:
-                        return new Starting(p, 8, 3,
-                            new NativeList<Instruction>(a) {Right, Ccw, Right, Right, Right, Right}, 7);
-
-                    case 26: return new Starting(p, 3, 2, new NativeList<Instruction>(a) {Cw, Cw}, 3);
-                    case 27: return new Starting(p, 2, 2, new NativeList<Instruction>(a) {Cw, Left, Cw}, 3);
-                    case 28: return new Starting(p, 4, 2, new NativeList<Instruction>(a) {Cw, Right, Cw}, 3);
-                    case 29: return new Starting(p, 1, 2, new NativeList<Instruction>(a) {Cw, Left, Cw, Left}, 4);
-                    case 30: return new Starting(p, 5, 2, new NativeList<Instruction>(a) {Cw, Right, Cw, Right}, 4);
-                    case 31: return new Starting(p, 0, 2, new NativeList<Instruction>(a) {Left, Cw, Left, Cw, Left}, 5);
-                    case 32:
-                        return new Starting(p, 6, 2, new NativeList<Instruction>(a) {Right, Cw, Right, Cw, Right}, 5);
-                    case 33:
-                        return new Starting(p, 7, 2,
-                            new NativeList<Instruction>(a) {Right, Cw, Right, Cw, Right, Right}, 7);
-                    default: throw new ArgumentOutOfRangeException();
+                for (sbyte x = 0; x < 8; x++) {
+                    var mv = new Move {
+                        hold = holdUsed,
+                        piece = new Piece(p)
+                    };
+                    MoveTo(x, 0, ref mv);
+                    moves[x] = mv;
                 }
+
+                for (sbyte x = -1; x < 8; x++) {
+                    var mv = new Move {
+                        hold = holdUsed,
+                        piece = new Piece(p)
+                    };
+                    MoveTo(x, 1, ref mv);
+                    moves[8 + x + 1] = mv;
+                }
+
+                for (sbyte x = 0; x < 9; x++) {
+                    var mv = new Move {
+                        hold = holdUsed,
+                        piece = new Piece(p)
+                    };
+                    MoveTo(x, 3, ref mv);
+                    moves[8 + 9 + x] = mv;
+                }
+
+                for (sbyte x = 0; x < 8; x++) {
+                    var mv = new Move {
+                        hold = holdUsed,
+                        piece = new Piece(p)
+                    };
+                    MoveTo(x, 2, ref mv);
+                    moves[8 + 9 + 9 + x] = mv;
+                }
+            }
+
+            return moves;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void MoveTo(sbyte to, sbyte r, ref Move mv) {
+            var c = 0;
+            for (var i = 0; i < 3 - to; i++) {
+                mv.Append(Left, i == 0 ? 1 : 2, mv.piece.WithOffset(-1, 0));
+                if (r != c) {
+                    c += r == -1 ? -1 : 1;
+                    mv.Append(r == -1 ? Ccw : Cw, 0, mv.piece.WithSpin((sbyte) c));
+                }
+            }
+
+            for (var i = 0; i < to - 3; i++) {
+                mv.Append(Right, i == 0 ? 1 : 2, mv.piece.WithOffset(1, 0));
+                if (r != c) {
+                    c += r == -1 ? -1 : 1;
+                    mv.Append(r == -1 ? Ccw : Cw, 0, mv.piece.WithSpin((sbyte) c));
+                }
+            }
+
+            while (r != c) {
+                c += r == -1 ? -1 : 1;
+                mv.Append(r == -1 ? Ccw : Cw, mv.length == 0 ? 1 : 2, mv.piece.WithSpin((sbyte) c));
             }
         }
     }

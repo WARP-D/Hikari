@@ -20,7 +20,7 @@ namespace Hikari.AI {
         };
 
         public Move Append(Instruction inst, int t, Piece p) {
-            if (IsFull) throw new Exception();
+            // if (IsFull) throw new Exception();
             instructions[length++] = (byte) inst;
             time += t;
             piece = p;
