@@ -17,14 +17,14 @@ namespace Hikari.AI.Jobs {
             var ex = inputs[index];
 
             if (ex.move.holdOnly) {
-                results[index] = default;
+                results[index] = new int4(0,0,0,0);
                 return;
             }
             
             var pl = ex.move.piece;
             var w = weight[0];
 
-            var fieldSafety = 0; //Represents how we can stand enemy's attack and dig garbage
+            var fieldSafety = 10000; //Represents how we can stand enemy's attack and dig garbage
             var fieldPower = 0; //Represents how we can send damage
             var moveScore = 0;
 

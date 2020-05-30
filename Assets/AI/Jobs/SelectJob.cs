@@ -55,8 +55,8 @@ namespace Hikari.AI.Jobs {
             for (var j = 0; j < children.length; j++) {
                 var child = tree[children.start + j];
 
-                var q = 0.01f * (child.visits != 0 ? 10 * SumInt4(child.evalSum) / child.visits : 0);
-                var u = 100f * math.sqrt(current.node.visits) / (1 + child.visits);
+                var q = 100f * (child.visits != 0 ? 10 * SumInt4(child.evalSum) / child.visits : 0);
+                var u = 0.01f * math.sqrt(current.node.visits) / (1 + child.visits);
                 var s = 1 * 4 * SumInt4(current.node.evalSelf);
 
                 var a = q + u + s;

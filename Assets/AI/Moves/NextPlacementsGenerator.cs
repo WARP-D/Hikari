@@ -55,17 +55,7 @@ namespace Hikari.AI {
                 checkQueue.Enqueue(m);
             }
 
-            bool Next(out Move mv) {
-                if (checkQueue.TryDequeue(out var next)) {
-                    mv = next;
-                    return true;
-                } else {
-                    mv = default;
-                    return false;
-                }
-            }
-
-            while (Next(out var mv)) {
+            while (checkQueue.TryDequeue(out var mv)) {
                 if (!mv.IsFull) {
                     Attempt(ref board, mv, ref passed, ref checkQueue, Left, maxHeight, pieceShapes);
                     Attempt(ref board, mv, ref passed, ref checkQueue, Right, maxHeight, pieceShapes);

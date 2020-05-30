@@ -29,7 +29,10 @@ namespace Hikari.AI.Jobs {
                     Expand(index, ref board, sel.currentPiece, ref ret, true);
                 } else {
                     // The first hold also makes queue advance 1 step, so we make this "hold only" node
-                    ret.Add(new ExpandResult(sel.index, Move.HoldOnlyMove,
+                    var hOnlyMove = new Move {
+                        holdOnly = true
+                    };
+                    ret.Add(new ExpandResult(sel.index, hOnlyMove,
                         board.WithHold(sel.currentPiece, true), default));
                 }
             }
